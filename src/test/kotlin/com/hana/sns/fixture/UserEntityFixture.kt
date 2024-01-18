@@ -6,7 +6,7 @@ class UserEntityFixture {
 
     companion object {
         fun get(userName: String, password: String): UserEntity {
-            return UserEntity(userName,password,1L)
+            return UserEntity(userName,password)
         }
     }
 }

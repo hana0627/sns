@@ -1,9 +1,13 @@
 package com.hana.sns.user.controller
 
+import com.hana.sns.common.controller.response.Response
+import com.hana.sns.user.controller.request.UserJoinRequest
+import com.hana.sns.user.controller.response.UserJoinResponse
 import com.hana.sns.user.model.User
 import com.hana.sns.user.service.UserService
 import lombok.RequiredArgsConstructor
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 
 @RequiredArgsConstructor
@@ -12,14 +16,13 @@ class UserController (
     private val userService: UserService
 ) {
 
-    // TODO: implement
     @PostMapping("/api/v1/users/join")
-    fun join() {
-        userService.join("","")
+    fun join(@RequestBody request: UserJoinRequest): Response<UserJoinResponse> {
+        val user: User = userService.join(request.userName, request.password)
+        return Response.success(UserJoinResponse(user))
     }
-    // TODO: implement
     @PostMapping("/api/v1/users/login")
     fun login() {
-        userService.login()
+        userService.login("","")
     }
 }

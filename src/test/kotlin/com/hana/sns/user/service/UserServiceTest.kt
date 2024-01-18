@@ -32,7 +32,7 @@ class UserServiceTest @Autowired constructor(
         Mockito.`when`(userEntityRepository.findByUserName(userName)).thenReturn(null)
         Mockito.`when`(userEntityRepository.save(any())).thenReturn(mock<UserEntity?>(UserEntity::class.java))
         //then
-        assertDoesNotThrow {userService.join(userName=userName, password=password) }
+       userService.join(userName, password)
     }
 
     @Test

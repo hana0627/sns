@@ -2,6 +2,7 @@ package com.hana.sns.user.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.hana.sns.common.exception.SnsApplicationException
+import com.hana.sns.common.exception.en.ErrorCode
 import com.hana.sns.user.controller.request.UserJoinRequest
 import com.hana.sns.user.controller.request.UserLoginRequest
 import com.hana.sns.user.model.User
@@ -53,7 +54,7 @@ class UserControllerTest @Autowired constructor(
         val password: String = "password"
 
 
-        Mockito.`when`(userService.join(userName,password)).thenThrow(SnsApplicationException())
+        Mockito.`when`(userService.join(userName,password)).thenThrow(SnsApplicationException(ErrorCode.DUPLICATED_USER_NAME,""))
 
         //when & then
         mockMvc.perform(
@@ -97,7 +98,7 @@ class UserControllerTest @Autowired constructor(
         val userName: String = "username"
         val password: String = "password"
 
-        Mockito.`when`(userService.login(userName, password)).thenThrow(SnsApplicationException())
+        Mockito.`when`(userService.login(userName, password)).thenThrow(SnsApplicationException(ErrorCode.DUPLICATED_USER_NAME,"TODO"))
 
         //when & then
         mockMvc.perform(
@@ -116,7 +117,7 @@ class UserControllerTest @Autowired constructor(
         val userName: String = "username"
         val password: String = "password"
 
-        Mockito.`when`(userService.login(userName, password)).thenThrow(SnsApplicationException())
+        Mockito.`when`(userService.login(userName, password)).thenThrow(SnsApplicationException(ErrorCode.DUPLICATED_USER_NAME,"TODO"))
 
         //when & then
         mockMvc.perform(

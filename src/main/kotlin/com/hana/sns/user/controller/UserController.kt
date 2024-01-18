@@ -2,7 +2,9 @@ package com.hana.sns.user.controller
 
 import com.hana.sns.common.controller.response.Response
 import com.hana.sns.user.controller.request.UserJoinRequest
+import com.hana.sns.user.controller.request.UserLoginRequest
 import com.hana.sns.user.controller.response.UserJoinResponse
+import com.hana.sns.user.controller.response.UserLoginResponse
 import com.hana.sns.user.model.User
 import com.hana.sns.user.service.UserService
 import lombok.RequiredArgsConstructor
@@ -22,7 +24,8 @@ class UserController (
         return Response.success(UserJoinResponse(user))
     }
     @PostMapping("/api/v1/users/login")
-    fun login() {
-        userService.login("","")
+    fun login(@RequestBody request: UserLoginRequest): Response<UserLoginResponse> {
+        val token: String = userService.login(request.userName, request.password)
+        return Response.success(UserLoginResponse(token))
     }
 }

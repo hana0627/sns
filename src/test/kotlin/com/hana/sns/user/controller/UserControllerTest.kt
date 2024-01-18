@@ -39,7 +39,7 @@ class UserControllerTest @Autowired constructor(
         mockMvc.perform(
             post("/api/v1/users/join")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsBytes(UserJoinRequest(userName = userName, password = password)))
+                .content(om.writeValueAsBytes(UserJoinRequest(userName, password)))
         )
             .andDo { result -> println(result.response.contentAsString) }
             .andExpect { status().isOk }
@@ -54,7 +54,7 @@ class UserControllerTest @Autowired constructor(
         val password: String = "password"
 
 
-        Mockito.`when`(userService.join(userName,password)).thenThrow(SnsApplicationException(ErrorCode.DUPLICATED_USER_NAME,""))
+        Mockito.`when`(userService.join(userName,password)).thenThrow(SnsApplicationException(ErrorCode.DUPLICATED_USER_NAME))
 
         //when & then
         mockMvc.perform(
@@ -98,7 +98,7 @@ class UserControllerTest @Autowired constructor(
         val userName: String = "username"
         val password: String = "password"
 
-        Mockito.`when`(userService.login(userName, password)).thenThrow(SnsApplicationException(ErrorCode.DUPLICATED_USER_NAME,"TODO"))
+        Mockito.`when`(userService.login(userName, password)).thenThrow(SnsApplicationException(ErrorCode.USER_NOT_FOUND))
 
         //when & then
         mockMvc.perform(
@@ -117,7 +117,7 @@ class UserControllerTest @Autowired constructor(
         val userName: String = "username"
         val password: String = "password"
 
-        Mockito.`when`(userService.login(userName, password)).thenThrow(SnsApplicationException(ErrorCode.DUPLICATED_USER_NAME,"TODO"))
+        Mockito.`when`(userService.login(userName, password)).thenThrow(SnsApplicationException(ErrorCode.INVALID_PASSWORD))
 
         //when & then
         mockMvc.perform(

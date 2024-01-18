@@ -28,12 +28,23 @@ repositories {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-//    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'com.fasterxml.jackson.module:jackson-module-kotlin'
     implementation 'org.jetbrains.kotlin:kotlin-reflect'
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'com.mysql:mysql-connector-j'
+
+
+    // jwt
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+    implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
+//    implementation 'io.jswonwebtoken:jjwt-api:0.11.5'
+//    runtimeOnly 'io.jswonwebtoken:jjwt-jackson:0.11.5'
+//    runtimeOnly 'io.jswonwebtoken:jjwt-imp:0.11.5'
+
     implementation 'org.projectlombok:lombok:1.18.22'
     annotationProcessor 'org.projectlombok:lombok:1.18.22'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -69,8 +80,8 @@ task cleanFrontEnd(type: Delete) {
     delete "$projectDir/front-end/static", "$projectDir/front-end/node_modules"
 }
 
-npmBuild.dependsOn npmInstall
-copyFrontEnd.dependsOn npmBuild
-compileJava.dependsOn copyFrontEnd
-
-clean.dependsOn cleanFrontEnd
+//npmBuild.dependsOn npmInstall
+//copyFrontEnd.dependsOn npmBuild
+//compileJava.dependsOn copyFrontEnd
+//
+//clean.dependsOn cleanFrontEnd

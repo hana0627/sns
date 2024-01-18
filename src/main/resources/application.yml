@@ -16,3 +16,9 @@ spring:
       driver-class-name: com.mysql.cj.jdbc.Driver
       maximum-pool-size: 50
       max-lifetime: 30000
+
+
+jwt:
+  secret-key: fast_campus.sns-applcation-2024.secret_key22222222222
+  #30 days
+  token.expired-time-ms: 2592000000

@@ -13,12 +13,15 @@ import org.mockito.Mockito.mock
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 
 @SpringBootTest
 class UserServiceTest @Autowired constructor(
     private val userService: UserService,
     @MockBean
-    private val userEntityRepository: UserEntityRepository
+    private val userEntityRepository: UserEntityRepository,
+    @MockBean
+    private val passwordEncoder: BCryptPasswordEncoder,
 ) {
 
     @Test
@@ -30,9 +33,12 @@ class UserServiceTest @Autowired constructor(
 
         //when
         Mockito.`when`(userEntityRepository.findByUserName(userName)).thenReturn(null)
-        Mockito.`when`(userEntityRepository.save(any())).thenReturn(mock<UserEntity?>(UserEntity::class.java))
+        Mockito.`when`(passwordEncoder.encode(password)).thenReturn("encrytedPassword")
+        Mockito.`when`(userEntityRepository.save(any())).thenReturn(UserEntityFixture.get(userName,password))
+
         //then
-       userService.join(userName, password)
+        assertDoesNotThrow { userService.join(userName, password) }
+
     }
 
     @Test
@@ -41,11 +47,12 @@ class UserServiceTest @Autowired constructor(
         //given
         val userName: String = "userName"
         val password: String = "password"
-        val fixture:UserEntity = UserEntityFixture.get(userName, password)
+        val fixture:UserEntity? = UserEntityFixture.get(userName, password)
 
 
         //when
-        Mockito.`when`(userEntityRepository.findByUserName(userName)).thenReturn(mock<UserEntity?>(fixture))
+        Mockito.`when`(userEntityRepository.findByUserName(userName)).thenReturn(fixture)
+        Mockito.`when`(passwordEncoder.encode(password)).thenReturn("encrytedPassword")
         Mockito.`when`(userEntityRepository.save(any())).thenReturn(mock<UserEntity?>(fixture))
         //then
         assertThrows<SnsApplicationException> {userService.join(userName=userName, password=password) }
@@ -57,9 +64,14 @@ class UserServiceTest @Autowired constructor(
         //given
         val userName: String = "userName"
         val password: String = "password"
-        val fixture:UserEntity = UserEntityFixture.get(userName, password)
+        val fixture:UserEntity? = UserEntityFixture.get(userName, password)
 
         //when
+        Mockito.`when`(userEntityRepository.findByUserName(userName)).thenReturn(fixture)
+        if (fixture != null) {
+            Mockito.`when`(passwordEncoder.matches(password,fixture.password)).thenReturn(true)
+        }
+
         //then
         assertDoesNotThrow {userService.login(userName=userName, password=password) }
     }
@@ -85,7 +97,7 @@ class UserServiceTest @Autowired constructor(
         val userName: String = "userName"
         val password: String = "password"
         val wrongPassword: String = "wrongPassword"
-        val fixture:UserEntity = UserEntityFixture.get(userName, password)
+        val fixture:UserEntity? = UserEntityFixture.get(userName, password)
 
 
         //when

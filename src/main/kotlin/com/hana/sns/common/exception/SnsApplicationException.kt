@@ -4,7 +4,7 @@ import com.hana.sns.common.exception.en.ErrorCode
 
 data class SnsApplicationException(
     val errorCode: ErrorCode,
-    override val message: String?
+    override val message: String? = null
 
 ) : RuntimeException() {
 

@@ -1,12 +1,10 @@
-package com.hana.sns.user.domain
+package com.hana.sns.user.infrastructure
 
+import com.hana.sns.user.domain.User
 import com.hana.sns.user.domain.en.UserRole
 import jakarta.persistence.*
 import org.hibernate.annotations.SQLDelete
 import org.hibernate.annotations.SQLRestriction
-import java.math.BigInteger
-import java.sql.Timestamp
-import java.time.Instant
 import java.time.LocalDateTime
 
 @Entity
@@ -37,6 +35,12 @@ class UserEntity (
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Int? = null,
 ){
+
+    constructor(user: User): this(
+        user.userName,
+        user.password,
+        user.userRole
+    )
 
     @PrePersist
     fun registeredAt() {

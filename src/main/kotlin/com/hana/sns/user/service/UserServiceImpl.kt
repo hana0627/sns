@@ -3,9 +3,11 @@ package com.hana.sns.user.service
 import com.hana.sns.common.exception.SnsApplicationException
 import com.hana.sns.common.exception.en.ErrorCode
 import com.hana.sns.common.utils.generateToken
-import com.hana.sns.user.domain.UserEntity
-import com.hana.sns.user.model.User
-import com.hana.sns.user.repository.UserEntityRepository
+import com.hana.sns.user.controller.port.UserService
+import com.hana.sns.user.infrastructure.UserEntity
+import com.hana.sns.user.domain.User
+import com.hana.sns.user.service.port.UserRepository
+import lombok.Builder
 import lombok.RequiredArgsConstructor
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
@@ -14,10 +16,10 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 @RequiredArgsConstructor
-class UserService (
-    private val userEntityRepository: UserEntityRepository,
+class UserServiceImpl (
+    private val userRepository: UserRepository,
     private val passwordEncoder: BCryptPasswordEncoder,
-){
+) : UserService{
 
     @Value("\${jwt.secret-key}")
     private val secretKey: String? = null
@@ -26,21 +28,18 @@ class UserService (
 
 
     @Transactional
-    fun join(userName: String, password: String): User {
+    override fun join(userName: String, password: String): User {
         // 회원가입된 userName으로 회원 가입된 user가 있는지
-        if (userEntityRepository.findByUserName(userName) != null) {
+        if (userRepository.findByUserName(userName) != null) {
             throw SnsApplicationException(ErrorCode.DUPLICATED_USER_NAME, "$userName is duplicated")
         }
 
         // 회원가입 진행 = user 등록
-        val userEntity: UserEntity = userEntityRepository.save(UserEntity(userName, passwordEncoder.encode(password)))
-
-        return User(userEntity);
+        return userRepository.save(User(userName, passwordEncoder.encode(password)))
     }
-
-    fun login(userName: String, password: String): String {
+    override fun login(userName: String, password: String): String {
         // 회원가입 여부 체크
-        val userEntity: UserEntity  = userEntityRepository.findByUserName(userName)?:throw SnsApplicationException(ErrorCode.USER_NOT_FOUND,"$userName is not founded")
+        val userEntity: User = userRepository.findByUserName(userName)?:throw SnsApplicationException(ErrorCode.USER_NOT_FOUND,"$userName is not founded")
 
         // 비밀번호 체크
 //        if(userEntity.password != password) {

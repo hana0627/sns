@@ -3,10 +3,11 @@ package com.hana.sns.user.controller
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.hana.sns.common.exception.SnsApplicationException
 import com.hana.sns.common.exception.en.ErrorCode
+import com.hana.sns.user.controller.port.UserService
 import com.hana.sns.user.controller.request.UserJoinRequest
 import com.hana.sns.user.controller.request.UserLoginRequest
-import com.hana.sns.user.model.User
-import com.hana.sns.user.service.UserService
+import com.hana.sns.user.domain.User
+import com.hana.sns.user.service.UserServiceImpl
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito
 import org.mockito.Mockito.mock

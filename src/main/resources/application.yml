@@ -19,6 +19,6 @@ spring:
 
 
 jwt:
-  secret-key: fast_campus.sns-applcation-2024.secret_key22222222222
+  secret-key: fast_campus.sns-applcation-2024.secret_key
   #30 days
   token.expired-time-ms: 2592000000

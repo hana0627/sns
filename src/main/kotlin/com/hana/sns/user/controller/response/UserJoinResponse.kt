@@ -1,8 +1,7 @@
 package com.hana.sns.user.controller.response
 
-import com.hana.sns.user.domain.UserEntity
 import com.hana.sns.user.domain.en.UserRole
-import com.hana.sns.user.model.User
+import com.hana.sns.user.domain.User
 
 data class UserJoinResponse (
     val id: Int?,

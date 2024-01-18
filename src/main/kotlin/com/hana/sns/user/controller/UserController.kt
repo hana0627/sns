@@ -5,8 +5,9 @@ import com.hana.sns.user.controller.request.UserJoinRequest
 import com.hana.sns.user.controller.request.UserLoginRequest
 import com.hana.sns.user.controller.response.UserJoinResponse
 import com.hana.sns.user.controller.response.UserLoginResponse
-import com.hana.sns.user.model.User
-import com.hana.sns.user.service.UserService
+import com.hana.sns.user.domain.User
+import com.hana.sns.user.service.UserServiceImpl
+import lombok.Builder
 import lombok.RequiredArgsConstructor
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -15,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequiredArgsConstructor
 @RestController
 class UserController (
-    private val userService: UserService
+    private val userService: UserServiceImpl
 ) {
 
     @PostMapping("/api/v1/users/join")

@@ -42,12 +42,11 @@ class UserServiceImpl (
         val userEntity: User = userRepository.findByUserName(userName)?:throw SnsApplicationException(ErrorCode.USER_NOT_FOUND,"$userName is not founded")
 
         // 비밀번호 체크
-//        if(userEntity.password != password) {
         if(!passwordEncoder.matches(password, userEntity.password)) {
             throw SnsApplicationException(ErrorCode.INVALID_PASSWORD)
         }
         // 토큰 생성
-        val result = generateToken(userName, secretKey!!, expiredMs!!)
+        val result = generateToken(userName, secretKey, expiredMs)
 
         return result
     }

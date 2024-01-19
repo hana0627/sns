@@ -8,15 +8,19 @@ import java.nio.charset.StandardCharsets
 import java.security.Key
 import java.util.*
 
-fun generateToken(userName: String, key: String, expiredMs: Long): String{
+fun generateToken(userName: String, key: String?, expiredMs: Long?): String{
+    if(key == null || expiredMs == null) {
+        throw NullPointerException("key 혹은 expiredMs가 존재하지 않습니다.")
+    }
+
     val claims: Claims = Jwts.claims()
     claims.put("userName", userName)
 
-    return Jwts.builder()
+    return "Bearer " + Jwts.builder()
         .setClaims(claims)
         .setIssuedAt(Date(System.currentTimeMillis()))
         .setExpiration(Date(System.currentTimeMillis() + expiredMs))
-        .signWith(getKey(key),SignatureAlgorithm.HS256)
+        .signWith(getKey(key), SignatureAlgorithm.HS256)
         .compact()
 
 }

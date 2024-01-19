@@ -1,133 +1,141 @@
 package com.hana.sns.user.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.hana.sns.common.controller.response.Response
 import com.hana.sns.common.exception.SnsApplicationException
 import com.hana.sns.common.exception.en.ErrorCode
+import com.hana.sns.mock.TestContainer
 import com.hana.sns.user.controller.port.UserService
 import com.hana.sns.user.controller.request.UserJoinRequest
 import com.hana.sns.user.controller.request.UserLoginRequest
+import com.hana.sns.user.controller.response.UserJoinResponse
+import com.hana.sns.user.controller.response.UserLoginResponse
 import com.hana.sns.user.domain.User
-import com.hana.sns.user.service.UserServiceImpl
+import com.hana.sns.user.service.port.UserRepository
+import jdk.swing.interop.SwingInterOpUtils
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito
-import org.mockito.Mockito.mock
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
+import org.springframework.test.util.ReflectionTestUtils
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
-@SpringBootTest
-@AutoConfigureMockMvc
-class UserControllerTest @Autowired constructor(
-    private val mockMvc: MockMvc,
-    private val om: ObjectMapper,
-    private val userService: UserService,
+class UserControllerTest(
 ) {
-
 
     @Test
     fun 회원가입() {
+        val testContainer = TestContainer.build()
+        val userController = testContainer.userController
+
         //given
-        val userName: String = "username"
+        val userName: String = "userName"
         val password: String = "password"
+        val userJoinRequest = UserJoinRequest(userName, password)
 
-        Mockito.`when`(userService.join(userName,password)).thenReturn(mock(User::class.java))
+        //when
+        val result: Response<UserJoinResponse> = userController.join(userJoinRequest)
 
-        //when & then
-        mockMvc.perform(
-            post("/api/v1/users/join")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsBytes(UserJoinRequest(userName, password)))
-        )
-            .andDo { result -> println(result.response.contentAsString) }
-            .andExpect { status().isOk }
+        //then
+        assertThat(result.resultCode).isEqualTo("SUCCESS")
+        assertThat(result.result.userName).isEqualTo("userName")
 
     }
 
 
     @Test
     fun 회원가입시_이미_회원가입된_username으로_회원가입을_하는경우_에러반환() {
+        val testContainer = TestContainer.build()
+        val userRepository = testContainer.userRepository
+        val passwordEncoder = testContainer.passwordEncoder
+
         //given
-        val userName: String = "username"
+        val userName: String = "userName"
         val password: String = "password"
+        val user = User.fixture(userName, passwordEncoder.encode(password))
 
+        userRepository.save(user)
+        val userJoinRequest = UserJoinRequest("userName", "password11")
 
-        Mockito.`when`(userService.join(userName,password)).thenThrow(SnsApplicationException(ErrorCode.DUPLICATED_USER_NAME))
-
-        //when & then
-        mockMvc.perform(
-            post("/api/v1/users/join")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsBytes(UserJoinRequest(userName = userName, password = password)))
-        )
-            .andDo { result -> println(result.response.contentAsString) }
-            .andExpect { status().isConflict }
-
-    }
-
-
-
-
-
-    @Test
-    fun  로그인() {
-        //given
-        val userName: String = "username"
-        val password: String = "password"
-
-        Mockito.`when`(userService.login(userName, password)).thenReturn("test-String")
-
-        //when & then
-        mockMvc.perform(
-            post("/api/v1/users/join")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsBytes(UserLoginRequest(userName = userName, password = password)))
-        )
-            .andDo { result -> println(result.response.contentAsString) }
-            .andExpect { status().isOk }
-    }
-
-
-
-
-    @Test
-    fun  로그인시_회원가입이_안된_userName으로_로그인을_입력할_경우_에러발생() {
-        //given
-        val userName: String = "username"
-        val password: String = "password"
-
-        Mockito.`when`(userService.login(userName, password)).thenThrow(SnsApplicationException(ErrorCode.USER_NOT_FOUND))
-
-        //when & then
-        mockMvc.perform(
-            post("/api/v1/users/join")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsBytes(UserLoginRequest(userName = userName, password = password)))
-        )
-            .andDo { result -> println(result.response.contentAsString) }
-            .andExpect { status().isNotFound }
+        //then & then
+        val errorCode =
+            assertThrows<SnsApplicationException> { testContainer.userController.join(userJoinRequest) }.errorCode
+        assertThat(errorCode).isEqualTo(ErrorCode.DUPLICATED_USER_NAME)
     }
 
 
     @Test
-    fun  로그인시_틀린_password를_입력할_경우_에러발생() {
+    fun 로그인() {
+        val testContainer = TestContainer.build()
+        val userController = testContainer.userController
+        val userService = testContainer.userService
+        val userRepository = testContainer.userRepository
+        val passwordEncoder = testContainer.passwordEncoder
+
         //given
         val userName: String = "username"
         val password: String = "password"
+        val user = User.fixture(userName, passwordEncoder.encode(password))
 
-        Mockito.`when`(userService.login(userName, password)).thenThrow(SnsApplicationException(ErrorCode.INVALID_PASSWORD))
+        userRepository.save(user)
+
+        val loginRequest = UserLoginRequest(userName, password)
+
+        // ReflectionTestUtils를 사용하여 private 필드에 값을 주입
+        ReflectionTestUtils.setField(userService, "secretKey", "hanatestcode.abcdefghijklmn.secret_key")
+        ReflectionTestUtils.setField(userService, "expiredMs", 360000L)
 
         //when & then
-        mockMvc.perform(
-            post("/api/v1/users/join")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsBytes(UserLoginRequest(userName = userName, password = password)))
-        )
-            .andDo { result -> println(result.response.contentAsString) }
-            .andExpect { status().isUnauthorized }
+        val result: Response<UserLoginResponse> = userController.login(loginRequest)
+
+        assertThat(result.resultCode).isEqualTo("SUCCESS")
+        assertThat(result.result.token.startsWith("Bearer ")).isTrue()
+    }
+
+
+    @Test
+    fun 로그인시_회원가입이_안된_userName으로_로그인을_입력할_경우_에러발생() {
+        val testContainer = TestContainer.build()
+        val userController = testContainer.userController
+
+        //given
+        val userName: String = "username"
+        val password: String = "password"
+        val loginRequest = UserLoginRequest(userName, password)
+
+        //when & then
+        val errorCode = assertThrows<SnsApplicationException> { userController.login(loginRequest) }.errorCode
+        assertThat(errorCode).isEqualTo(ErrorCode.USER_NOT_FOUND)
+    }
+
+
+
+    @Test
+    fun 로그인시_틀린_password를_입력할_경우_에러발생() {
+        val testContainer = TestContainer.build()
+        val userController = testContainer.userController
+        val userRepository = testContainer.userRepository
+        val passwordEncoder = testContainer.passwordEncoder
+
+        //given
+        val userName: String = "username"
+        val password: String = "password"
+        val wrongPassword: String = "wrongPassword"
+        val user = User.fixture(userName, passwordEncoder.encode(password))
+        userRepository.save(user)
+
+        val loginRequest = UserLoginRequest(userName, wrongPassword)
+
+        //when & then
+        val errorCode = assertThrows<SnsApplicationException> { userController.login(loginRequest) }.errorCode
+        assertThat(errorCode).isEqualTo(ErrorCode.INVALID_PASSWORD)
     }
 
 

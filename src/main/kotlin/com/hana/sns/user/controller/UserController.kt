@@ -1,6 +1,7 @@
 package com.hana.sns.user.controller
 
 import com.hana.sns.common.controller.response.Response
+import com.hana.sns.user.controller.port.UserService
 import com.hana.sns.user.controller.request.UserJoinRequest
 import com.hana.sns.user.controller.request.UserLoginRequest
 import com.hana.sns.user.controller.response.UserJoinResponse
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequiredArgsConstructor
 @RestController
 class UserController (
-    private val userService: UserServiceImpl
+    private val userService: UserService
 ) {
 
     @PostMapping("/api/v1/users/join")

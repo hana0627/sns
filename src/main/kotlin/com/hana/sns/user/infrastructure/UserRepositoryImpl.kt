@@ -3,7 +3,9 @@ package com.hana.sns.user.infrastructure
 import com.hana.sns.user.domain.User
 import com.hana.sns.user.service.port.UserRepository
 import lombok.RequiredArgsConstructor
+import org.springframework.stereotype.Repository
 
+@Repository
 @RequiredArgsConstructor
 class UserRepositoryImpl(
     private val userJpaRepository: UserJpaRepository,

@@ -8,6 +8,7 @@ import com.hana.sns.user.infrastructure.UserEntity
 import com.hana.sns.user.domain.User
 import com.hana.sns.user.service.port.UserRepository
 import lombok.Builder
+import lombok.NoArgsConstructor
 import lombok.RequiredArgsConstructor
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 @RequiredArgsConstructor
+@NoArgsConstructor
 class UserServiceImpl (
     private val userRepository: UserRepository,
     private val passwordEncoder: BCryptPasswordEncoder,
@@ -49,5 +51,9 @@ class UserServiceImpl (
         val result = generateToken(userName, secretKey, expiredMs)
 
         return result
+    }
+
+    override fun loadUserByUserName(userName: String): User {
+        return userRepository.findByUserName(userName)?: throw SnsApplicationException(ErrorCode.USER_NOT_FOUND,"$userName is not founded")
     }
 }

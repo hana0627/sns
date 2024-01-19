@@ -8,6 +8,20 @@ import java.nio.charset.StandardCharsets
 import java.security.Key
 import java.util.*
 
+fun getUserName(token: String, key: String): String {
+    return extreactClaims(token, key).get("userName",String::class.java)
+}
+
+fun isExpired(token: String, key: String): Boolean {
+    val expiredDate: Date = extreactClaims(token, key).expiration
+    return expiredDate.before(Date())
+}
+
+private fun extreactClaims(token: String, key: String): Claims {
+    return Jwts.parserBuilder().setSigningKey(getKey(key))
+        .build().parseClaimsJws(token).body
+}
+
 fun generateToken(userName: String, key: String?, expiredMs: Long?): String{
     if(key == null || expiredMs == null) {
         throw NullPointerException("key 혹은 expiredMs가 존재하지 않습니다.")

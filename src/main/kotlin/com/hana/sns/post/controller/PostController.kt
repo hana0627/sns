@@ -16,7 +16,7 @@ class PostController(
 ) {
 
 
-    @PostMapping
+    @PostMapping("/api/v1/posts")
     fun create(@RequestBody request: PostCreateRequest, authentication: Authentication) {
         postService.create(request.title, request.body, authentication.name)
     }

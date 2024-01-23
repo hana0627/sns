@@ -2,7 +2,7 @@ package com.hana.sns.user.service
 
 import com.hana.sns.common.exception.SnsApplicationException
 import com.hana.sns.common.exception.en.ErrorCode
-import com.hana.sns.common.utils.generateToken
+import com.hana.sns.common.utils.JwtUtils
 import com.hana.sns.user.controller.port.UserService
 import com.hana.sns.user.infrastructure.UserEntity
 import com.hana.sns.user.domain.User
@@ -48,7 +48,7 @@ class UserServiceImpl (
             throw SnsApplicationException(ErrorCode.INVALID_PASSWORD)
         }
         // 토큰 생성
-        val result = generateToken(userName, secretKey, expiredMs)
+        val result = JwtUtils.generateToken(userName, secretKey, expiredMs)
 
         return result
     }

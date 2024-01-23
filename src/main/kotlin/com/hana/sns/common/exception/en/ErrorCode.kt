@@ -14,5 +14,7 @@ enum class ErrorCode(
     USER_NOT_FOUND(HttpStatus.NOT_FOUND,"User not founded"),
     // 패스워드 불일치
     INVALID_PASSWORD(HttpStatus.UNAUTHORIZED,"Password is invalid"),
+    // JWT 토큰 에러
+    INVALID_TOKEN(HttpStatus.UNAUTHORIZED,"Token is invalid")
 
 }

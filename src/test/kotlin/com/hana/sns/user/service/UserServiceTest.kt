@@ -5,10 +5,8 @@ import com.hana.sns.common.exception.en.ErrorCode
 import com.hana.sns.mock.FakePasswordEncoder
 import com.hana.sns.mock.FakeUserRepository
 import com.hana.sns.user.domain.User
-import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.springframework.test.util.ReflectionTestUtils
 

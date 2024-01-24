@@ -1,6 +1,6 @@
 package com.hana.sns.post.infrastructure
 
-import com.hana.sns.user.domain.en.UserRole
+import com.hana.sns.post.domain.Post
 import com.hana.sns.user.infrastructure.UserEntity
 import jakarta.persistence.*
 import org.hibernate.annotations.SQLDelete
@@ -11,7 +11,7 @@ import java.time.LocalDateTime
 @Table(name = "post")
 @SQLDelete(sql = "UPDATE post SET deleted_at = NOW(6) WHERE id=?")
 @SQLRestriction("deleted_at is NULL")
-class PostEntity (
+class PostEntity(
     @Column(name = "title")
     val title: String,
 
@@ -34,8 +34,13 @@ class PostEntity (
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Int? = null,
-){
+) {
 
+    constructor(post: Post) : this(
+        post.title,
+        post.body,
+        UserEntity(post.user),
+    )
 
 
 }

@@ -22,4 +22,8 @@ class PostRepositoryImpl (
             null
         }
     }
+
+    override fun delete(post: Post) {
+        return postJpaRepository.delete(PostEntity(post))
+    }
 }

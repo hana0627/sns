@@ -23,5 +23,12 @@ class FakePostRepository : PostRepository {
         return data.find { it.id == id }
     }
 
+    override fun delete(post: Post) {
+        data.removeIf{it == post }
+    }
+
+    fun findAll(): List<Post> {
+        return data
+    }
 
 }

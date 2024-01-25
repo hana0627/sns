@@ -33,4 +33,17 @@ class PostServiceImpl(
         post.update(title, body)
         return postRepository.save(post)
     }
+
+    override fun delete(postId: Int, userName: String?): Int {
+// 포스트존재여부
+        val post: Post = postRepository.findById(postId)?: throw SnsApplicationException(ErrorCode.POST_NOT_FOUND,"post($postId) is not founded")
+        // 포스트 작성자 == 수정하려는 사람
+        if(post.user.userName != userName) {
+            throw SnsApplicationException(ErrorCode.INVALID_PERMISSION,"$userName has no permission with post($postId)")
+        }
+        //TODO delete 벌크연산 -> N+1문제 유의주시
+        postRepository.delete(post)
+
+        return postId
+    }
 }

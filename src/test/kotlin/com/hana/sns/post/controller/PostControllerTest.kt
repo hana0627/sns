@@ -174,4 +174,99 @@ class PostControllerTest {
         //then
         assertThat(errorCode).isEqualTo(ErrorCode.POST_NOT_FOUND)
     }
+
+
+
+    @Test
+    fun 글_삭제가_성공하는_경우() {
+        //given
+        val testContainer = TestContainer.build()
+        val postController = testContainer.postController
+        val userRepository = testContainer.userRepository
+        val postRepository = testContainer.postRepository
+        val passwordEncoder = testContainer.passwordEncoder
+
+        val user = User.fixture("userName",passwordEncoder.encode("password"))
+        val post = Post.fixture("title","body",user)
+
+        val savedUser: User = userRepository.save(user)
+        val savedPost: Post = postRepository.save(post)
+
+        val authentication = TestingAuthenticationToken("userName","password", mutableListOf(SimpleGrantedAuthority(UserRole.USER.toString())))
+        //when
+        val result = postController.delete(savedPost.id!!, authentication)
+
+        //then
+        val size = postRepository.findAll().size
+        assertThat(result.resultCode).isEqualTo("SUCCESS")
+        assertThat(result.result).isEqualTo(savedPost.id)
+        assertThat(size).isEqualTo(0)
+    }
+
+    @Test
+    fun 로그인하지_않은_유저가_글_삭제를_하는_경우_예외를_발생한다() {
+        //given
+        val testContainer = TestContainer.build()
+        val postController = testContainer.postController
+        val userRepository = testContainer.userRepository
+        val postRepository = testContainer.postRepository
+        val passwordEncoder = testContainer.passwordEncoder
+
+        val user = User.fixture("userName",passwordEncoder.encode("password"))
+        val post = Post.fixture("title","body",user)
+
+        val savedUser: User = userRepository.save(user)
+        val savedPost: Post = postRepository.save(post)
+
+        //when & then
+        assertThrows<NullPointerException>  { postController.delete(savedPost.id!!, null!!) }
+    }
+    @Test
+    fun 글_삭제시_본인이_작성한_글이_아니라면_예외를_발생한다() {
+        //given
+        val testContainer = TestContainer.build()
+        val postController = testContainer.postController
+        val userRepository = testContainer.userRepository
+        val postRepository = testContainer.postRepository
+        val passwordEncoder = testContainer.passwordEncoder
+
+        val user = User.fixture("userName",passwordEncoder.encode("password"))
+        val post = Post.fixture("title","body",user)
+
+        val savedUser: User = userRepository.save(user)
+        val savedPost: Post = postRepository.save(post)
+
+        val authentication = TestingAuthenticationToken("wrongUserName","password", mutableListOf(SimpleGrantedAuthority(UserRole.USER.toString())))
+        //when
+        val errorCode = assertThrows<SnsApplicationException> {
+            postController.delete(savedPost.id!! , authentication)
+        }.errorCode
+
+        //then
+        assertThat(errorCode).isEqualTo(ErrorCode.INVALID_PERMISSION)
+    }
+    @Test
+    fun 글_삭제시_삭제하려는_글이_없는경우_예외를_발생한다() {
+        //given
+        val testContainer = TestContainer.build()
+        val postController = testContainer.postController
+        val userRepository = testContainer.userRepository
+        val postRepository = testContainer.postRepository
+        val passwordEncoder = testContainer.passwordEncoder
+
+        val user = User.fixture("userName",passwordEncoder.encode("password"))
+        val post = Post.fixture("title","body",user)
+
+        val savedUser: User = userRepository.save(user)
+        val savedPost: Post = postRepository.save(post)
+
+        val authentication = TestingAuthenticationToken("userName","password", mutableListOf(SimpleGrantedAuthority(UserRole.USER.toString())))
+        //when
+        val errorCode = assertThrows<SnsApplicationException> {
+            postController.delete(9999 , authentication)
+        }.errorCode
+
+        //then
+        assertThat(errorCode).isEqualTo(ErrorCode.POST_NOT_FOUND)
+    }
 }

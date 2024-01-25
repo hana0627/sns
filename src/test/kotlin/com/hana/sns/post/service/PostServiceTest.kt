@@ -148,4 +148,87 @@ class PostServiceTest {
         assertThat(errorCode).isEqualTo(ErrorCode.POST_NOT_FOUND)
 
     }
+
+
+    @Test
+    fun 글_삭제가_성공하는_경우() {
+        //given
+        val passwordEncoder = FakePasswordEncoder()
+        val userRepository = FakeUserRepository()
+        val postRepository = FakePostRepository()
+        val postService = PostServiceImpl(postRepository, userRepository)
+        val user = User.fixture("userName",passwordEncoder.encode("password"))
+        val post = Post.fixture("title","body",user)
+
+        val savedUser: User = userRepository.save(user)
+        val savedPost: Post = postRepository.save(post)
+
+
+        //when
+        postService.delete(savedPost.id!!, savedUser.userName)
+
+        //then
+        val result = postRepository.findAll().size
+        assertThat(result).isEqualTo(0)
+    }
+
+    @Test
+    fun 로그인하지_않은_유저가_글_삭제를_하는_경우_예외를_발생한다() {
+        //given
+        val passwordEncoder = FakePasswordEncoder()
+        val userRepository = FakeUserRepository()
+        val postRepository = FakePostRepository()
+        val postService = PostServiceImpl(postRepository, userRepository)
+        val user = User.fixture("userName",passwordEncoder.encode("password"))
+        val post = Post.fixture("title","body",user)
+
+        val savedUser: User = userRepository.save(user)
+        val savedPost: Post = postRepository.save(post)
+
+        //when & then
+        assertThrows<NullPointerException> { postService.delete(savedPost.id!!, null!!) }
+
+    }
+
+    @Test
+    fun 글_삭제시_본인이_작성한_글이_아니라면_예외를_발생한다() {
+        //given
+        val passwordEncoder = FakePasswordEncoder()
+        val userRepository = FakeUserRepository()
+        val postRepository = FakePostRepository()
+        val postService = PostServiceImpl(postRepository, userRepository)
+        val user = User.fixture("userName",passwordEncoder.encode("password"))
+        val post = Post.fixture("title","body",user)
+
+        val savedUser: User = userRepository.save(user)
+        val savedPost: Post = postRepository.save(post)
+
+        //when & then
+        val errorCode = assertThrows<SnsApplicationException> { postService.delete(savedPost.id!!,"wrongUserName") }.errorCode
+
+        assertThat(errorCode).isEqualTo(ErrorCode.INVALID_PERMISSION)
+
+    }
+    @Test
+    fun 글_삭제시_삭제하려는_글이_없는경우_예외를_발생한다() {
+        //given
+        val passwordEncoder = FakePasswordEncoder()
+        val userRepository = FakeUserRepository()
+        val postRepository = FakePostRepository()
+        val postService = PostServiceImpl(postRepository, userRepository)
+        val user = User.fixture("userName",passwordEncoder.encode("password"))
+        val post = Post.fixture("title","body",user)
+
+        val savedUser: User = userRepository.save(user)
+        val savedPost: Post = postRepository.save(post)
+
+        //when & then
+        val errorCode = assertThrows<SnsApplicationException> { postService.delete(99999, savedUser.userName) }.errorCode
+
+        assertThat(errorCode).isEqualTo(ErrorCode.POST_NOT_FOUND)
+
+    }
+
+
+
 }

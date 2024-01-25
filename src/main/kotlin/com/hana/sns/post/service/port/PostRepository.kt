@@ -6,4 +6,5 @@ interface PostRepository {
 
     fun save(post: Post): Post
     fun findById(postId: Int): Post?
+    fun delete(post: Post)
 }

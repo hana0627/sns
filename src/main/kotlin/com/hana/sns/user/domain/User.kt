@@ -16,7 +16,7 @@ data class User (
     var registeredAt: LocalDateTime? = null,
     var updatedAt: LocalDateTime? = null,
     var deletedAt: LocalDateTime? = null,
-    val id: Int? = null,
+    var id: Int? = null,
     ) : UserDetails{
 
     constructor(entity: UserEntity): this(

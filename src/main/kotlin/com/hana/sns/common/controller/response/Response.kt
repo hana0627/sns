@@ -9,7 +9,6 @@ data class Response<Any>(
         fun error(errorCode: String): Response<Nothing?> {
             return Response(errorCode, null)
         }
-
         fun <Any> success(result: Any): Response<Any> {
             return Response("SUCCESS", result)
         }

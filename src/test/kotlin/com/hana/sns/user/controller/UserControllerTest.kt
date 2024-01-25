@@ -1,31 +1,18 @@
 package com.hana.sns.user.controller
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.hana.sns.common.controller.response.Response
 import com.hana.sns.common.exception.SnsApplicationException
 import com.hana.sns.common.exception.en.ErrorCode
 import com.hana.sns.mock.TestContainer
-import com.hana.sns.user.controller.port.UserService
 import com.hana.sns.user.controller.request.UserJoinRequest
 import com.hana.sns.user.controller.request.UserLoginRequest
 import com.hana.sns.user.controller.response.UserJoinResponse
 import com.hana.sns.user.controller.response.UserLoginResponse
 import com.hana.sns.user.domain.User
-import com.hana.sns.user.service.port.UserRepository
-import jdk.swing.interop.SwingInterOpUtils
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.mockito.Mockito
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.http.MediaType
 import org.springframework.test.util.ReflectionTestUtils
-import org.springframework.test.web.servlet.MockMvc
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
 class UserControllerTest(
 ) {

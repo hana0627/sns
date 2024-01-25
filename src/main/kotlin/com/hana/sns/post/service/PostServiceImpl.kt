@@ -3,10 +3,13 @@ package com.hana.sns.post.service
 import com.hana.sns.common.exception.SnsApplicationException
 import com.hana.sns.common.exception.en.ErrorCode
 import com.hana.sns.post.controller.port.PostService
+import com.hana.sns.post.controller.response.PostResponse
 import com.hana.sns.post.domain.Post
 import com.hana.sns.post.service.port.PostRepository
 import com.hana.sns.user.domain.User
 import com.hana.sns.user.service.port.UserRepository
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -35,7 +38,7 @@ class PostServiceImpl(
     }
 
     override fun delete(postId: Int, userName: String?): Int {
-// 포스트존재여부
+        // 포스트존재여부
         val post: Post = postRepository.findById(postId)?: throw SnsApplicationException(ErrorCode.POST_NOT_FOUND,"post($postId) is not founded")
         // 포스트 작성자 == 수정하려는 사람
         if(post.user.userName != userName) {
@@ -45,5 +48,9 @@ class PostServiceImpl(
         postRepository.delete(post)
 
         return postId
+    }
+
+    override fun list(pageable: Pageable): Page<PostResponse> {
+        return postRepository.findAll(pageable).map{PostResponse(it)}
     }
 }

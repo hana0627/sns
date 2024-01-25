@@ -6,8 +6,11 @@ import com.hana.sns.post.controller.request.PostCreateRequest
 import com.hana.sns.post.controller.request.PostModifyRequest
 import com.hana.sns.post.controller.response.PostResponse
 import lombok.RequiredArgsConstructor
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
@@ -36,4 +39,8 @@ class PostController(
         return Response.success(postService.delete(postId, authentication.name));
     }
 
+    @GetMapping("/api/v1/posts")
+    fun list(pageable: Pageable) : Response<Page<PostResponse>>{
+        return Response.success(postService.list(pageable))
+    }
 }

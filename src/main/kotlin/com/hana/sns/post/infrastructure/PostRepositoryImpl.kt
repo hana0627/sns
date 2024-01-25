@@ -3,6 +3,8 @@ package com.hana.sns.post.infrastructure
 import com.hana.sns.post.domain.Post
 import com.hana.sns.post.service.port.PostRepository
 import lombok.RequiredArgsConstructor
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Repository
 
 @Repository
@@ -25,5 +27,9 @@ class PostRepositoryImpl (
 
     override fun delete(post: Post) {
         return postJpaRepository.delete(PostEntity(post))
+    }
+
+    override fun findAll(pageable: Pageable): Page<Post> {
+        return postJpaRepository.findAll(pageable).map{Post(it)}
     }
 }

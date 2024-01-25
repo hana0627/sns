@@ -5,11 +5,15 @@ import com.hana.sns.common.exception.en.ErrorCode
 import com.hana.sns.mock.FakePasswordEncoder
 import com.hana.sns.mock.FakePostRepository
 import com.hana.sns.mock.FakeUserRepository
+import com.hana.sns.post.controller.response.PostResponse
 import com.hana.sns.post.domain.Post
+import com.hana.sns.post.infrastructure.PostEntity
 import com.hana.sns.user.domain.User
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Pageable
 import java.lang.NullPointerException
 
 class PostServiceTest {
@@ -228,6 +232,47 @@ class PostServiceTest {
         assertThat(errorCode).isEqualTo(ErrorCode.POST_NOT_FOUND)
 
     }
+
+    @Test
+    fun 피드_목록요청이_성공한_경우() {
+        //given
+        val passwordEncoder = FakePasswordEncoder()
+        val userRepository = FakeUserRepository()
+        val postRepository = FakePostRepository()
+        val postService = PostServiceImpl(postRepository, userRepository)
+        val user1 = User.fixture("userName1",passwordEncoder.encode("password"))
+        val user2 = User.fixture("userName2",passwordEncoder.encode("password"))
+        userRepository.save(user1)
+        userRepository.save(user2)
+
+        for(i in 0..29) {
+            if(i % 2 == 0) {
+                postRepository.save(Post.fixture("title$i","body$i",user1))
+            }
+            else {
+                postRepository.save(Post.fixture("title$i","body$i",user2))
+            }
+        }
+
+        val pageable = PageRequest.of(0,10)
+        //when
+        val result : List<PostResponse> = postService.list(pageable).get().toList()
+
+        //then
+        assertThat(result.size).isEqualTo(10)
+        assertThat(result[0].title).isEqualTo("title0")
+        assertThat(result[0].body).isEqualTo("body0")
+        assertThat(result[0].user.userName).isEqualTo(user1.userName)
+    }
+//    @Test
+//    fun 내_피드_목록요청이_성공한_경우() {
+//        //given
+//
+//        //when
+//
+//        //then
+//
+//    }
 
 
 

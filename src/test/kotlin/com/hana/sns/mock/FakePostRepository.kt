@@ -2,6 +2,9 @@ package com.hana.sns.mock
 
 import com.hana.sns.post.domain.Post
 import com.hana.sns.post.service.port.PostRepository
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.Pageable
 import java.util.concurrent.atomic.AtomicLong
 
 class FakePostRepository : PostRepository {
@@ -25,6 +28,22 @@ class FakePostRepository : PostRepository {
 
     override fun delete(post: Post) {
         data.removeIf{it == post }
+    }
+
+    override fun findAll(pageable: Pageable): Page<Post> {
+        val pageSize = pageable.pageSize
+        val offset = pageable.offset.toInt()
+
+        // 페이지 시작 / 끝 index 추가
+        // TODO 추가학습 coerceAtMost??
+        val startIndex = offset.coerceAtMost(data.size - 1)
+        val endIndex = (offset + pageSize).coerceAtMost(data.size)
+
+        // TODO sublist?? 중간 사이값 추출
+        val sublist = data.subList(startIndex, endIndex)
+
+        return PageImpl(sublist, pageable, data.size.toLong())
+
     }
 
     fun findAll(): List<Post> {

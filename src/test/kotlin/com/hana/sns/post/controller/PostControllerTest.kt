@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.springframework.data.domain.PageRequest
 import org.springframework.security.authentication.TestingAuthenticationToken
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import java.lang.NullPointerException
@@ -268,5 +269,41 @@ class PostControllerTest {
 
         //then
         assertThat(errorCode).isEqualTo(ErrorCode.POST_NOT_FOUND)
+    }
+
+
+    @Test
+    fun 피드_목록요청이_성공한_경우() {
+        //given
+        val testContainer = TestContainer.build()
+        val postController = testContainer.postController
+        val userRepository = testContainer.userRepository
+        val postRepository = testContainer.postRepository
+        val passwordEncoder = testContainer.passwordEncoder
+
+        val user1 = User.fixture("userName1",passwordEncoder.encode("password"))
+        val user2 = User.fixture("userName2",passwordEncoder.encode("password"))
+        userRepository.save(user1)
+        userRepository.save(user2)
+
+        for(i in 0..29) {
+            if(i % 2 == 0) {
+                postRepository.save(Post.fixture("title$i","body$i",user1))
+            }
+            else {
+                postRepository.save(Post.fixture("title$i","body$i",user2))
+            }
+        }
+
+        val pageable = PageRequest.of(0,10)
+        //when
+        val result = postController.list(pageable)
+        val resultBody = result.result.get().toList()
+        //then
+        assertThat(result.resultCode).isEqualTo("SUCCESS")
+        assertThat(resultBody.size).isEqualTo(10)
+        assertThat(resultBody[0].title).isEqualTo("title0")
+        assertThat(resultBody[0].body).isEqualTo("body0")
+        assertThat(resultBody[0].user.userName).isEqualTo(user1.userName)
     }
 }

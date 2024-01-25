@@ -19,8 +19,9 @@ class FakePostRepository : PostRepository {
         return post
     }
 
-    fun findById(id: Int): Post? {
+    override fun findById(id: Int): Post? {
         return data.find { it.id == id }
     }
+
 
 }

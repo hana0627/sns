@@ -22,4 +22,15 @@ class PostServiceImpl(
         val post = Post(title, body, user)
         return postRepository.save(post).id!!
     }
+
+    override fun modify(postId: Int, title: String, body: String, userName: String): Post {
+        // 포스트존재여부
+        val post: Post = postRepository.findById(postId)?: throw SnsApplicationException(ErrorCode.POST_NOT_FOUND,"post($postId) is not founded")
+        // 포스트 작성자 == 수정하려는 사람
+        if(post.user.userName != userName) {
+            throw SnsApplicationException(ErrorCode.INVALID_PERMISSION,"$userName has no permission with post($postId)")
+        }
+        post.update(title, body)
+        return postRepository.save(post)
+    }
 }

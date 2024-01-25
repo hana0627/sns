@@ -12,6 +12,10 @@ enum class ErrorCode(
     DUPLICATED_USER_NAME(HttpStatus.CONFLICT,"User name is duplicated"),
     // 존재하지 않는 회원
     USER_NOT_FOUND(HttpStatus.NOT_FOUND,"User not founded"),
+    // 존재하지 않는 게시글
+    POST_NOT_FOUND(HttpStatus.NOT_FOUND,"Post not founded"),
+    // 존재하지 않는 게시글
+    INVALID_PERMISSION(HttpStatus.UNAUTHORIZED,"Permission is invalid"),
     // 패스워드 불일치
     INVALID_PASSWORD(HttpStatus.UNAUTHORIZED,"Password is invalid"),
     // JWT 토큰 에러

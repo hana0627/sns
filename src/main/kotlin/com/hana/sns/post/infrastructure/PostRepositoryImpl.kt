@@ -13,4 +13,13 @@ class PostRepositoryImpl (
     override fun save(post: Post): Post {
         return Post(postJpaRepository.save(PostEntity(post)))
     }
+
+    override fun findById(postId: Int): Post? {
+        val postEntity: PostEntity? = postJpaRepository.findById(postId.toLong()).orElse(null)
+        return if (postEntity != null) {
+            Post(postEntity)
+        } else {
+            null
+        }
+    }
 }

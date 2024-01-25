@@ -5,8 +5,8 @@ import com.hana.sns.user.domain.User
 import java.time.LocalDateTime
 
 data class Post(
-    val title: String,
-    val body: String,
+    var title: String,
+    var body: String,
     val user: User,
     var registeredAt: LocalDateTime? = null,
     var updatedAt: LocalDateTime? = null,
@@ -23,4 +23,25 @@ data class Post(
         postEntity.deletedAt,
         postEntity.id,
     )
+
+    companion object {
+        fun fixture(
+            title: String = "title",
+            body: String = "body",
+            user: User = User.fixture("userName", "password", null, null, null, null, 1),
+        ): Post {
+            return Post(
+                title = title,
+                body = body,
+                user = user,
+            )
+        }
+    }
+
+    fun update(title:String, body: String) {
+        this.title = title
+        this.body = body
+    }
+
+
 }

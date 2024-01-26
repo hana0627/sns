@@ -47,4 +47,9 @@ class PostController(
     fun my(pageable: Pageable, authentication: Authentication) : Response<Page<PostResponse>>{
         return Response.success(postService.my(pageable, authentication.name))
     }
+
+    @PostMapping("/api/v1/posts/{postId}/likes")
+    fun like(@PathVariable postId: Int, authentication: Authentication): Response<Any>  {
+        return Response.success(postService.like(postId, authentication.name))
+    }
 }

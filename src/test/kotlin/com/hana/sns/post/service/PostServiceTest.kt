@@ -299,5 +299,64 @@ class PostServiceTest {
     }
 
 
+    @Test
+    fun 좋아요_기능_성공() {
+        //given
+        val passwordEncoder = FakePasswordEncoder()
+        val userRepository = FakeUserRepository()
+        val postRepository = FakePostRepository()
+        val postService = PostServiceImpl(postRepository, userRepository)
+        val user = User.fixture("userName",passwordEncoder.encode("password"))
+        val post = Post.fixture("title","body",user)
+
+        val savedUser: User = userRepository.save(user)
+        val savedPost: Post = postRepository.save(post)
+
+        //when
+        postService.like(post.id!!, user.userName)
+
+        //then
+        //TODO
+
+    }
+    @Test
+    fun 좋아요기능시_유저가_로그인하지_않은_경우_예외를_발생한다() {
+        //given
+        val passwordEncoder = FakePasswordEncoder()
+        val userRepository = FakeUserRepository()
+        val postRepository = FakePostRepository()
+        val postService = PostServiceImpl(postRepository, userRepository)
+        val user = User.fixture("userName",passwordEncoder.encode("password"))
+        val post = Post.fixture("title","body",user)
+
+        val savedUser: User = userRepository.save(user)
+        val savedPost: Post = postRepository.save(post)
+
+        //when
+        postService.like(post.id!!, null)
+
+        //then
+
+    }
+    @Test
+    fun 존재하지_않는_글에대해서_좋아요_요청시_예외를_발생한다() {
+        //given
+        val passwordEncoder = FakePasswordEncoder()
+        val userRepository = FakeUserRepository()
+        val postRepository = FakePostRepository()
+        val postService = PostServiceImpl(postRepository, userRepository)
+        val user = User.fixture("userName",passwordEncoder.encode("password"))
+        val post = Post.fixture("title","body",user)
+
+        val savedUser: User = userRepository.save(user)
+        val savedPost: Post = postRepository.save(post)
+
+        //when
+        postService.like(99999, user.userName)
+
+        //then
+
+    }
+
 
 }

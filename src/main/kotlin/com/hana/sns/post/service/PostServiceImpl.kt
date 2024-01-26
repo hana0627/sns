@@ -58,4 +58,9 @@ class PostServiceImpl(
         val user: User = userRepository.findByUserName(userName)?: throw SnsApplicationException(ErrorCode.USER_NOT_FOUND, "$userName is not founded")
         return postRepository.findAllByUser(pageable, user).map{PostResponse(it)}
     }
+
+    override fun like(postId: Int, name: String?): Int {
+        //TODO implement
+        return postId!!
+    }
 }

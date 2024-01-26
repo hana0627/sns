@@ -12,4 +12,5 @@ interface PostService {
     fun delete(postId: Int, userName: String?): Int
     fun list(pageable: Pageable): Page<PostResponse>
     fun my(pageable: Pageable, userName: String): Page<PostResponse>
+    fun like(postId: Int, name: String?): Int
 }

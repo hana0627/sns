@@ -343,4 +343,72 @@ class PostControllerTest {
         assertThat(resultBody[1].body).isEqualTo("body2")
         assertThat(resultBody[1].user.userName).isEqualTo(user1.userName)
     }
+
+
+    @Test
+    fun 좋아요_기능_성공() {
+        //given
+        val testContainer = TestContainer.build()
+        val postController = testContainer.postController
+        val userRepository = testContainer.userRepository
+        val postRepository = testContainer.postRepository
+        val passwordEncoder = testContainer.passwordEncoder
+
+        val user = User.fixture("userName",passwordEncoder.encode("password"))
+        val post = Post.fixture("title","body",user)
+
+        val savedUser: User = userRepository.save(user)
+        val savedPost: Post = postRepository.save(post)
+
+        val authentication = TestingAuthenticationToken(user.userName,user.password, mutableListOf(SimpleGrantedAuthority(UserRole.USER.toString())))
+
+        //when
+        postController.like(savedPost.id!!, authentication)
+
+        //then
+        //TODO SOMETHING
+        assertThat(true).isEqualTo(false)
+
+    }
+
+
+    @Test
+    fun 좋아요기능시_유저가_로그인하지_않은_경우_예외를_발생한다() {
+        //given
+        val testContainer = TestContainer.build()
+        val postController = testContainer.postController
+        val postRepository = testContainer.postRepository
+        val passwordEncoder = testContainer.passwordEncoder
+
+        val user = User.fixture("userName",passwordEncoder.encode("password"))
+        val post = Post.fixture("title","body",user)
+
+        val savedPost: Post = postRepository.save(post)
+
+
+        //when & then
+        postController.like(savedPost.id!!, null!!)
+    }
+
+
+    @Test
+    fun 존재하지_않는_글에대해서_좋아요_요청시_예외를_발생한다() {
+        //given
+        val testContainer = TestContainer.build()
+        val postController = testContainer.postController
+        val userRepository = testContainer.userRepository
+        val passwordEncoder = testContainer.passwordEncoder
+
+        val user = User.fixture("userName",passwordEncoder.encode("password"))
+
+        val savedUser: User = userRepository.save(user)
+
+        val authentication = TestingAuthenticationToken(user.userName,user.password, mutableListOf(SimpleGrantedAuthority(UserRole.USER.toString())))
+
+        //when & then
+        postController.like(999999, authentication)
+
+    }
+
+
 }

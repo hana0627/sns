@@ -43,4 +43,8 @@ class PostController(
     fun list(pageable: Pageable) : Response<Page<PostResponse>>{
         return Response.success(postService.list(pageable))
     }
+    @GetMapping("/api/v1/posts/my")
+    fun my(pageable: Pageable, authentication: Authentication) : Response<Page<PostResponse>>{
+        return Response.success(postService.my(pageable, authentication.name))
+    }
 }

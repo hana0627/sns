@@ -306,4 +306,41 @@ class PostControllerTest {
         assertThat(resultBody[0].body).isEqualTo("body0")
         assertThat(resultBody[0].user.userName).isEqualTo(user1.userName)
     }
+
+
+    @Test
+    fun 내_피드목록_요청이_성공한_경우() {
+        //given
+        val testContainer = TestContainer.build()
+        val postController = testContainer.postController
+        val userRepository = testContainer.userRepository
+        val postRepository = testContainer.postRepository
+        val passwordEncoder = testContainer.passwordEncoder
+
+        val user1 = User.fixture("userName1",passwordEncoder.encode("password"))
+        val user2 = User.fixture("userName2",passwordEncoder.encode("password"))
+        userRepository.save(user1)
+        userRepository.save(user2)
+
+        for(i in 0..29) {
+            if(i % 2 == 0) {
+                postRepository.save(Post.fixture("title$i","body$i",user1))
+            }
+            else {
+                postRepository.save(Post.fixture("title$i","body$i",user2))
+            }
+        }
+
+        val pageable = PageRequest.of(0,10)
+        val authentication = TestingAuthenticationToken(user1.userName,user1.password, mutableListOf(SimpleGrantedAuthority(UserRole.USER.toString())))
+        //when
+        val result = postController.my(pageable, authentication)
+        val resultBody = result.result.get().toList()
+        //then
+        assertThat(result.resultCode).isEqualTo("SUCCESS")
+        assertThat(resultBody.size).isEqualTo(10)
+        assertThat(resultBody[1].title).isEqualTo("title2")
+        assertThat(resultBody[1].body).isEqualTo("body2")
+        assertThat(resultBody[1].user.userName).isEqualTo(user1.userName)
+    }
 }

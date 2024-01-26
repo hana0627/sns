@@ -2,6 +2,7 @@ package com.hana.sns.mock
 
 import com.hana.sns.post.domain.Post
 import com.hana.sns.post.service.port.PostRepository
+import com.hana.sns.user.domain.User
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
@@ -41,6 +42,19 @@ class FakePostRepository : PostRepository {
 
         // TODO sublist?? 중간 사이값 추출
         val sublist = data.subList(startIndex, endIndex)
+
+        return PageImpl(sublist, pageable, data.size.toLong())
+
+    }
+
+    override fun findAllByUser(pageable: Pageable, user: User): Page<Post> {
+        val pageSize = pageable.pageSize
+        val offset = pageable.offset.toInt()
+
+        val startIndex = offset.coerceAtMost(data.size - 1)
+        val endIndex = (offset + pageSize).coerceAtMost(data.size)
+
+        val sublist = data.filter { it.user == user }.subList(startIndex, endIndex)
 
         return PageImpl(sublist, pageable, data.size.toLong())
 

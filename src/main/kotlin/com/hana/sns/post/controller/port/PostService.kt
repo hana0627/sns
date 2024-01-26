@@ -11,4 +11,5 @@ interface PostService {
     fun modify(postId: Int, title: String, body: String, userName: String): Post
     fun delete(postId: Int, userName: String?): Int
     fun list(pageable: Pageable): Page<PostResponse>
+    fun my(pageable: Pageable, userName: String): Page<PostResponse>
 }

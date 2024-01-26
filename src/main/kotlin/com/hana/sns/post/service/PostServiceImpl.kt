@@ -53,4 +53,9 @@ class PostServiceImpl(
     override fun list(pageable: Pageable): Page<PostResponse> {
         return postRepository.findAll(pageable).map{PostResponse(it)}
     }
+
+    override fun my(pageable: Pageable, userName: String): Page<PostResponse> {
+        val user: User = userRepository.findByUserName(userName)?: throw SnsApplicationException(ErrorCode.USER_NOT_FOUND, "$userName is not founded")
+        return postRepository.findAllByUser(pageable, user).map{PostResponse(it)}
+    }
 }

@@ -29,13 +29,13 @@ class PostController(
         return Response.success(postService.create(request.title, request.body, authentication.name));
     }
     @PutMapping("/api/v1/posts/{postId}")
-    fun modify(@PathVariable postId: Int, @RequestBody request: PostModifyRequest, authentication: Authentication): Response<PostResponse> {
+    fun modify(@PathVariable postId: Long, @RequestBody request: PostModifyRequest, authentication: Authentication): Response<PostResponse> {
         val result = PostResponse(postService.modify(postId, request.title, request.body, authentication.name))
         return Response.success(result)
     }
 
     @DeleteMapping("/api/v1/posts/{postId}")
-    fun delete (@PathVariable postId: Int, authentication: Authentication): Response<Any> {
+    fun delete (@PathVariable postId: Long, authentication: Authentication): Response<Any> {
         return Response.success(postService.delete(postId, authentication.name));
     }
 
@@ -49,7 +49,13 @@ class PostController(
     }
 
     @PostMapping("/api/v1/posts/{postId}/likes")
-    fun like(@PathVariable postId: Int, authentication: Authentication): Response<Any>  {
+    fun like(@PathVariable postId: Long, authentication: Authentication): Response<Any>  {
         return Response.success(postService.like(postId, authentication.name))
     }
+
+    @GetMapping("/api/v1/posts/{postId}/likes")
+    fun likeCount(@PathVariable postId: Long): Response<Long> {
+        return Response.success(postService.likeCount(postId))
+    }
+
 }

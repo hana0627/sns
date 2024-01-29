@@ -22,14 +22,14 @@ class PostServiceImpl(
     private val postLikeRepository: PostLikeRepository,
 ) : PostService {
     @Transactional
-    override fun create(title: String, body: String, userName: String): Int{
+    override fun create(title: String, body: String, userName: String): Long{
         val user: User = userRepository.findByUserName(userName)?: throw SnsApplicationException(ErrorCode.USER_NOT_FOUND, "$userName is not founded")
 
         val post = Post(title, body, user)
         return postRepository.save(post).id!!
     }
 
-    override fun modify(postId: Int, title: String, body: String, userName: String): Post {
+    override fun modify(postId: Long, title: String, body: String, userName: String): Post {
         // 포스트존재여부
         val post: Post = postRepository.findById(postId)?: throw SnsApplicationException(ErrorCode.POST_NOT_FOUND,"post($postId) is not founded")
         // 포스트 작성자 == 수정하려는 사람
@@ -40,7 +40,7 @@ class PostServiceImpl(
         return postRepository.save(post)
     }
 
-    override fun delete(postId: Int, userName: String?): Int {
+    override fun delete(postId: Long, userName: String?): Long {
         // 포스트존재여부
         val post: Post = postRepository.findById(postId)?: throw SnsApplicationException(ErrorCode.POST_NOT_FOUND,"post($postId) is not founded")
         // 포스트 작성자 == 수정하려는 사람
@@ -63,7 +63,7 @@ class PostServiceImpl(
     }
 
     @Transactional
-    override fun like(postId: Int, userName: String?): Int {
+    override fun like(postId: Long, userName: String?): Long {
         if(userName == null) {
             throw SnsApplicationException(ErrorCode.INVALID_PERMISSION, "userName is null")
         }
@@ -77,5 +77,12 @@ class PostServiceImpl(
 
         val result = postLikeRepository.save(PostLike(user, post))
         return result.id!!
+    }
+
+    override fun likeCount(postId: Long): Long {
+        val post: Post = postRepository.findById(postId) ?: throw SnsApplicationException(ErrorCode.POST_NOT_FOUND,"post($postId) is not founded")
+
+        postLikeRepository.countByPost()
+        return 1
     }
 }

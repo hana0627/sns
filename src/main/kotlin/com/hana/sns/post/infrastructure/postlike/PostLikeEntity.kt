@@ -22,7 +22,7 @@ class PostLikeEntity (
     var updatedAt: LocalDateTime? = null,
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Int? = null,
+    val id: Long? = null,
     ){
 
 

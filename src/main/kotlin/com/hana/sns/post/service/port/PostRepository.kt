@@ -8,7 +8,7 @@ import org.springframework.data.domain.Pageable
 interface PostRepository {
 
     fun save(post: Post): Post
-    fun findById(postId: Int): Post?
+    fun findById(postId: Long): Post?
     fun delete(post: Post)
     fun findAll(pageable: Pageable): Page<Post>
     fun findAllByUser(pageable: Pageable, user: User): Page<Post>

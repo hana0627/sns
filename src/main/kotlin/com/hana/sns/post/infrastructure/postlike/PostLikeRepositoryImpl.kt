@@ -27,4 +27,9 @@ class PostLikeRepositoryImpl (
     override fun save(postLike: PostLike): PostLike {
         return PostLike(postLikeJpaRepository.save(PostLikeEntity(postLike)))
     }
+
+    override fun countByPost(): Long {
+        TODO("Not yet implemented")
+        return 1
+    }
 }

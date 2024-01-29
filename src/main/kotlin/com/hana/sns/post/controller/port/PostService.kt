@@ -7,10 +7,11 @@ import org.springframework.data.domain.Pageable
 
 interface PostService {
 
-    fun create(title: String, body: String, userName: String): Int
-    fun modify(postId: Int, title: String, body: String, userName: String): Post
-    fun delete(postId: Int, userName: String?): Int
+    fun create(title: String, body: String, userName: String): Long
+    fun modify(postId: Long, title: String, body: String, userName: String): Post
+    fun delete(postId: Long, userName: String?): Long
     fun list(pageable: Pageable): Page<PostResponse>
     fun my(pageable: Pageable, userName: String): Page<PostResponse>
-    fun like(postId: Int, userName: String?): Int
+    fun like(postId: Long, userName: String?): Long
+    fun likeCount(postId: Long): Long
 }

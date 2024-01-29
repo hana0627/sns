@@ -6,7 +6,7 @@ import com.hana.sns.user.domain.User
 data class PostLike (
     val user: User,
     val post: Post,
-    var id: Int? = null
+    var id: Long? = null
 ){
 
     constructor(postLikeEntity: PostLikeEntity): this (

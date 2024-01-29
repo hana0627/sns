@@ -5,7 +5,7 @@ import com.hana.sns.user.controller.response.UserResponse
 import java.time.LocalDateTime
 
 data class PostResponse (
-    var id: Int?,
+    var id: Long?,
     var title: String,
     var body: String,
     var user: UserResponse,

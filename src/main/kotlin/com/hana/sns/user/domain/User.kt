@@ -16,7 +16,7 @@ data class User (
     var registeredAt: LocalDateTime? = null,
     var updatedAt: LocalDateTime? = null,
     var deletedAt: LocalDateTime? = null,
-    var id: Int? = null,
+    var id: Long? = null,
     ) : UserDetails{
 
     constructor(entity: UserEntity): this(
@@ -38,7 +38,7 @@ data class User (
             registeredAt: LocalDateTime? = null,
             updatedAt: LocalDateTime? = null,
             deletedAt: LocalDateTime? = null,
-            id: Int? = null,
+            id: Long? = null,
 
         ) : User {
             return User(

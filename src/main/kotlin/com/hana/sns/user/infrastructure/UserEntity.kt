@@ -33,7 +33,7 @@ class UserEntity (
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Int? = null,
+    val id: Long? = null,
 ){
 
     constructor(user: User): this(

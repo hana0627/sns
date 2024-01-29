@@ -11,7 +11,7 @@ data class Post(
     var registeredAt: LocalDateTime? = null,
     var updatedAt: LocalDateTime? = null,
     var deletedAt: LocalDateTime? = null,
-    var id: Int? = null,
+    var id: Long? = null,
 ) {
 
     constructor(postEntity: PostEntity) : this(

@@ -3,10 +3,7 @@ package com.hana.sns.post.controller
 import com.hana.sns.common.controller.response.Response
 import com.hana.sns.common.exception.SnsApplicationException
 import com.hana.sns.common.exception.en.ErrorCode
-import com.hana.sns.mock.FakePasswordEncoder
-import com.hana.sns.mock.FakePostRepository
-import com.hana.sns.mock.FakeUserRepository
-import com.hana.sns.mock.TestContainer
+import com.hana.sns.mock.*
 import com.hana.sns.post.controller.request.PostCreateRequest
 import com.hana.sns.post.controller.request.PostModifyRequest
 import com.hana.sns.post.controller.response.PostResponse
@@ -45,7 +42,7 @@ class PostControllerTest {
 
         //then
         assertThat(result.resultCode).isEqualTo("SUCCESS")
-        assertThat(result.result).isEqualTo(1)
+        assertThat(result.result).isEqualTo(1L)
     }
 
     @Test
@@ -368,7 +365,7 @@ class PostControllerTest {
 
         //then
         assertThat(result.resultCode).isEqualTo("SUCCESS")
-        assertThat(result.result).isEqualTo(1)
+        assertThat(result.result).isEqualTo(1L)
     }
 
 
@@ -440,5 +437,37 @@ class PostControllerTest {
 
     }
 
+
+    @Test
+    fun 게시글_조회시_해당게시글의_좋아요_숫자도_함께_응답한다() {
+        //given
+        val testContainer = TestContainer.build()
+        val postController = testContainer.postController
+        val userRepository = testContainer.userRepository
+        val postRepository = testContainer.postRepository
+        val postLikeRepository = testContainer.postLikeRepository
+        val passwordEncoder = testContainer.passwordEncoder
+
+        val user1 = User.fixture("userName1",passwordEncoder.encode("password"))
+        val user2 = User.fixture("userName2",passwordEncoder.encode("password"))
+        val user3 = User.fixture("userName3",passwordEncoder.encode("password"))
+        val post = Post.fixture("title","body",user1)
+
+        userRepository.save(user1)
+        userRepository.save(user2)
+        userRepository.save(user3)
+        postLikeRepository.save(PostLike(user1,post))
+        postLikeRepository.save(PostLike(user2,post))
+        postLikeRepository.save(PostLike(user3,post))
+        val savedPost: Post = postRepository.save(post)
+
+
+        //when
+        val result = postController.likeCount(savedPost.id!!)
+
+        //then
+        assertThat(result.resultCode).isEqualTo("SUCCESS")
+        assertThat(result.result).isEqualTo(3L)
+    }
 
 }

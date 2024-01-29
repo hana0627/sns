@@ -399,4 +399,34 @@ class PostServiceTest {
     }
 
 
+    @Test
+    fun 게시글_조회시_해당게시글의_좋아요_숫자도_함께_응답한다() {
+        //given
+        val passwordEncoder = FakePasswordEncoder()
+        val userRepository = FakeUserRepository()
+        val postRepository = FakePostRepository()
+        val postLikeRepository = FakePostLikeRepository()
+        val postService = PostServiceImpl(postRepository, userRepository, postLikeRepository)
+        val user1 = User.fixture("userName1",passwordEncoder.encode("password"))
+        val user2 = User.fixture("userName2",passwordEncoder.encode("password"))
+        val user3 = User.fixture("userName3",passwordEncoder.encode("password"))
+        val post = Post.fixture("title","body",user1)
+
+        userRepository.save(user1)
+        userRepository.save(user2)
+        userRepository.save(user3)
+        val savedPost = postRepository.save(post)
+
+        postLikeRepository.save(PostLike(user1, post))
+        postLikeRepository.save(PostLike(user2, post))
+        postLikeRepository.save(PostLike(user3, post))
+
+        //when
+        val result = postService.likeCount(savedPost.id!!)
+
+        //then
+        assertThat(result).isEqualTo(3)
+    }
+
+
 }

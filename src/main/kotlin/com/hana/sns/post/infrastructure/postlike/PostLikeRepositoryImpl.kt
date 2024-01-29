@@ -13,6 +13,7 @@ import org.springframework.stereotype.Repository
 @RequiredArgsConstructor
 class PostLikeRepositoryImpl (
     private val postLikeJpaRepository: PostLikeJpaRepository,
+    private val postLikeQueryRepository: PostLikeQueryRepository
 ) : PostLikeRepository {
     override fun findByUserAndPost(user: User, post: Post): PostLike? {
         val postLikeEntity: PostLikeEntity? = postLikeJpaRepository.findByUserAndPost(UserEntity(user), PostEntity(post))
@@ -28,8 +29,8 @@ class PostLikeRepositoryImpl (
         return PostLike(postLikeJpaRepository.save(PostLikeEntity(postLike)))
     }
 
-    override fun countByPost(): Long {
-        TODO("Not yet implemented")
-        return 1
+    override fun countByPost(post: Post): Long {
+        return postLikeQueryRepository.countByPost(post)
     }
+
 }

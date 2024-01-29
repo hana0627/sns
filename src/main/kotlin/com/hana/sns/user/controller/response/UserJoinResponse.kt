@@ -4,7 +4,7 @@ import com.hana.sns.user.domain.en.UserRole
 import com.hana.sns.user.domain.User
 
 data class UserJoinResponse (
-    val id: Int?,
+    val id: Long?,
     val userName: String,
     val userRole : UserRole?,
     ){

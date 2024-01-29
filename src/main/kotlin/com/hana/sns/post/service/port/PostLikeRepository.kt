@@ -8,5 +8,5 @@ interface PostLikeRepository {
 
     fun findByUserAndPost(user: User, post: Post): PostLike?
     fun save(postLike: PostLike): PostLike
-    fun countByPost() : Long
+    fun countByPost(post: Post) : Long
 }

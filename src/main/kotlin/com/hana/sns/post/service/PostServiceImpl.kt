@@ -82,7 +82,6 @@ class PostServiceImpl(
     override fun likeCount(postId: Long): Long {
         val post: Post = postRepository.findById(postId) ?: throw SnsApplicationException(ErrorCode.POST_NOT_FOUND,"post($postId) is not founded")
 
-        postLikeRepository.countByPost()
-        return 1
+        return postLikeRepository.countByPost(post)
     }
 }

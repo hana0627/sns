@@ -3,10 +3,12 @@ package com.hana.sns.post.service
 import com.hana.sns.common.exception.SnsApplicationException
 import com.hana.sns.common.exception.en.ErrorCode
 import com.hana.sns.mock.FakePasswordEncoder
+import com.hana.sns.mock.FakePostLikeRepository
 import com.hana.sns.mock.FakePostRepository
 import com.hana.sns.mock.FakeUserRepository
 import com.hana.sns.post.controller.response.PostResponse
 import com.hana.sns.post.domain.Post
+import com.hana.sns.post.domain.PostLike
 import com.hana.sns.post.infrastructure.PostEntity
 import com.hana.sns.user.domain.User
 import org.assertj.core.api.Assertions.assertThat
@@ -24,7 +26,8 @@ class PostServiceTest {
         val passwordEncoder = FakePasswordEncoder()
         val userRepository = FakeUserRepository()
         val postRepository = FakePostRepository()
-        val postService = PostServiceImpl(postRepository, userRepository)
+        val postLikeRepository = FakePostLikeRepository()
+        val postService = PostServiceImpl(postRepository, userRepository, postLikeRepository)
         val user = User.fixture("userName",passwordEncoder.encode("password"))
         userRepository.save(user)
 
@@ -47,7 +50,8 @@ class PostServiceTest {
         val passwordEncoder = FakePasswordEncoder()
         val userRepository = FakeUserRepository()
         val postRepository = FakePostRepository()
-        val postService = PostServiceImpl(postRepository, userRepository)
+        val postLikeRepository = FakePostLikeRepository()
+        val postService = PostServiceImpl(postRepository, userRepository, postLikeRepository)
 
         val title: String = "title"
         val body: String = "postBody"
@@ -66,7 +70,8 @@ class PostServiceTest {
         val passwordEncoder = FakePasswordEncoder()
         val userRepository = FakeUserRepository()
         val postRepository = FakePostRepository()
-        val postService = PostServiceImpl(postRepository, userRepository)
+        val postLikeRepository = FakePostLikeRepository()
+        val postService = PostServiceImpl(postRepository, userRepository, postLikeRepository)
         val user = User.fixture("userName",passwordEncoder.encode("password"))
         val post = Post.fixture("title","body",user)
 
@@ -91,7 +96,8 @@ class PostServiceTest {
         val passwordEncoder = FakePasswordEncoder()
         val userRepository = FakeUserRepository()
         val postRepository = FakePostRepository()
-        val postService = PostServiceImpl(postRepository, userRepository)
+        val postLikeRepository = FakePostLikeRepository()
+        val postService = PostServiceImpl(postRepository, userRepository, postLikeRepository)
         val user = User.fixture("userName",passwordEncoder.encode("password"))
         val post = Post.fixture("title","body",user)
 
@@ -114,7 +120,8 @@ class PostServiceTest {
         val passwordEncoder = FakePasswordEncoder()
         val userRepository = FakeUserRepository()
         val postRepository = FakePostRepository()
-        val postService = PostServiceImpl(postRepository, userRepository)
+        val postLikeRepository = FakePostLikeRepository()
+        val postService = PostServiceImpl(postRepository, userRepository, postLikeRepository)
         val user = User.fixture("userName",passwordEncoder.encode("password"))
         val post = Post.fixture("title","body",user)
 
@@ -136,7 +143,8 @@ class PostServiceTest {
         val passwordEncoder = FakePasswordEncoder()
         val userRepository = FakeUserRepository()
         val postRepository = FakePostRepository()
-        val postService = PostServiceImpl(postRepository, userRepository)
+        val postLikeRepository = FakePostLikeRepository()
+        val postService = PostServiceImpl(postRepository, userRepository, postLikeRepository)
         val user = User.fixture("userName",passwordEncoder.encode("password"))
         val post = Post.fixture("title","body",user)
 
@@ -160,7 +168,8 @@ class PostServiceTest {
         val passwordEncoder = FakePasswordEncoder()
         val userRepository = FakeUserRepository()
         val postRepository = FakePostRepository()
-        val postService = PostServiceImpl(postRepository, userRepository)
+        val postLikeRepository = FakePostLikeRepository()
+        val postService = PostServiceImpl(postRepository, userRepository, postLikeRepository)
         val user = User.fixture("userName",passwordEncoder.encode("password"))
         val post = Post.fixture("title","body",user)
 
@@ -182,7 +191,8 @@ class PostServiceTest {
         val passwordEncoder = FakePasswordEncoder()
         val userRepository = FakeUserRepository()
         val postRepository = FakePostRepository()
-        val postService = PostServiceImpl(postRepository, userRepository)
+        val postLikeRepository = FakePostLikeRepository()
+        val postService = PostServiceImpl(postRepository, userRepository, postLikeRepository)
         val user = User.fixture("userName",passwordEncoder.encode("password"))
         val post = Post.fixture("title","body",user)
 
@@ -200,7 +210,8 @@ class PostServiceTest {
         val passwordEncoder = FakePasswordEncoder()
         val userRepository = FakeUserRepository()
         val postRepository = FakePostRepository()
-        val postService = PostServiceImpl(postRepository, userRepository)
+        val postLikeRepository = FakePostLikeRepository()
+        val postService = PostServiceImpl(postRepository, userRepository, postLikeRepository)
         val user = User.fixture("userName",passwordEncoder.encode("password"))
         val post = Post.fixture("title","body",user)
 
@@ -219,7 +230,8 @@ class PostServiceTest {
         val passwordEncoder = FakePasswordEncoder()
         val userRepository = FakeUserRepository()
         val postRepository = FakePostRepository()
-        val postService = PostServiceImpl(postRepository, userRepository)
+        val postLikeRepository = FakePostLikeRepository()
+        val postService = PostServiceImpl(postRepository, userRepository, postLikeRepository)
         val user = User.fixture("userName",passwordEncoder.encode("password"))
         val post = Post.fixture("title","body",user)
 
@@ -239,7 +251,8 @@ class PostServiceTest {
         val passwordEncoder = FakePasswordEncoder()
         val userRepository = FakeUserRepository()
         val postRepository = FakePostRepository()
-        val postService = PostServiceImpl(postRepository, userRepository)
+        val postLikeRepository = FakePostLikeRepository()
+        val postService = PostServiceImpl(postRepository, userRepository, postLikeRepository)
         val user1 = User.fixture("userName1",passwordEncoder.encode("password"))
         val user2 = User.fixture("userName2",passwordEncoder.encode("password"))
         userRepository.save(user1)
@@ -270,7 +283,8 @@ class PostServiceTest {
         val passwordEncoder = FakePasswordEncoder()
         val userRepository = FakeUserRepository()
         val postRepository = FakePostRepository()
-        val postService = PostServiceImpl(postRepository, userRepository)
+        val postLikeRepository = FakePostLikeRepository()
+        val postService = PostServiceImpl(postRepository, userRepository, postLikeRepository)
         val user1 = User.fixture("userName1",passwordEncoder.encode("password"))
         val user2 = User.fixture("userName2",passwordEncoder.encode("password"))
         userRepository.save(user1)
@@ -305,7 +319,8 @@ class PostServiceTest {
         val passwordEncoder = FakePasswordEncoder()
         val userRepository = FakeUserRepository()
         val postRepository = FakePostRepository()
-        val postService = PostServiceImpl(postRepository, userRepository)
+        val postLikeRepository = FakePostLikeRepository()
+        val postService = PostServiceImpl(postRepository, userRepository, postLikeRepository)
         val user = User.fixture("userName",passwordEncoder.encode("password"))
         val post = Post.fixture("title","body",user)
 
@@ -313,49 +328,74 @@ class PostServiceTest {
         val savedPost: Post = postRepository.save(post)
 
         //when
-        postService.like(post.id!!, user.userName)
+        val id = postService.like(post.id!!, user.userName)
 
         //then
-        //TODO
-
+        val result = postLikeRepository.findById(id)
+        assertThat(result).isNotNull
     }
+
     @Test
     fun 좋아요기능시_유저가_로그인하지_않은_경우_예외를_발생한다() {
         //given
         val passwordEncoder = FakePasswordEncoder()
         val userRepository = FakeUserRepository()
         val postRepository = FakePostRepository()
-        val postService = PostServiceImpl(postRepository, userRepository)
+        val postLikeRepository = FakePostLikeRepository()
+        val postService = PostServiceImpl(postRepository, userRepository, postLikeRepository)
         val user = User.fixture("userName",passwordEncoder.encode("password"))
         val post = Post.fixture("title","body",user)
 
-        val savedUser: User = userRepository.save(user)
-        val savedPost: Post = postRepository.save(post)
+        postRepository.save(post)
 
-        //when
-        postService.like(post.id!!, null)
-
-        //then
-
+        //when & then
+        val error = assertThrows<SnsApplicationException> { postService.like(post.id!!, null) }
+        assertThat(error.errorCode).isEqualTo(ErrorCode.INVALID_PERMISSION)
+        assertThat(error.message).isEqualTo("userName is null")
     }
+
     @Test
     fun 존재하지_않는_글에대해서_좋아요_요청시_예외를_발생한다() {
         //given
         val passwordEncoder = FakePasswordEncoder()
         val userRepository = FakeUserRepository()
         val postRepository = FakePostRepository()
-        val postService = PostServiceImpl(postRepository, userRepository)
+        val postLikeRepository = FakePostLikeRepository()
+        val postService = PostServiceImpl(postRepository, userRepository, postLikeRepository)
         val user = User.fixture("userName",passwordEncoder.encode("password"))
         val post = Post.fixture("title","body",user)
 
         val savedUser: User = userRepository.save(user)
         val savedPost: Post = postRepository.save(post)
 
-        //when
-        postService.like(99999, user.userName)
+        //when & then
+        val error = assertThrows<SnsApplicationException> { postService.like(999999, savedUser.userName) }
+        assertThat(error.errorCode).isEqualTo(ErrorCode.POST_NOT_FOUND)
+        assertThat(error.message).isEqualTo("post(999999) is not founded")
 
-        //then
+    }
 
+
+    @Test
+    fun 이미_좋아요_누른_게시글에_좋아요를_다시_누르면_예외를_발생시킨다() {
+        //given
+        val passwordEncoder = FakePasswordEncoder()
+        val userRepository = FakeUserRepository()
+        val postRepository = FakePostRepository()
+        val postLikeRepository = FakePostLikeRepository()
+        val postService = PostServiceImpl(postRepository, userRepository, postLikeRepository)
+        val user = User.fixture("userName",passwordEncoder.encode("password"))
+        val post = Post.fixture("title","body",user)
+
+        val savedUser: User = userRepository.save(user)
+        val savedPost: Post = postRepository.save(post)
+        postLikeRepository.save(PostLike(savedUser, savedPost))
+
+        //when & then
+        val error = assertThrows<SnsApplicationException> { postService.like(post.id!!, user.userName) }
+
+        assertThat(error.errorCode).isEqualTo(ErrorCode.ALREADY_LIKED)
+        assertThat(error.message).isEqualTo("userName userName already liked post 1")
     }
 
 

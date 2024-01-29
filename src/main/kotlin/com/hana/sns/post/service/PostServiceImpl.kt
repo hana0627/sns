@@ -5,6 +5,8 @@ import com.hana.sns.common.exception.en.ErrorCode
 import com.hana.sns.post.controller.port.PostService
 import com.hana.sns.post.controller.response.PostResponse
 import com.hana.sns.post.domain.Post
+import com.hana.sns.post.domain.PostLike
+import com.hana.sns.post.service.port.PostLikeRepository
 import com.hana.sns.post.service.port.PostRepository
 import com.hana.sns.user.domain.User
 import com.hana.sns.user.service.port.UserRepository
@@ -17,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional
 class PostServiceImpl(
     private val postRepository: PostRepository,
     private val userRepository: UserRepository,
+    private val postLikeRepository: PostLikeRepository,
 ) : PostService {
     @Transactional
     override fun create(title: String, body: String, userName: String): Int{
@@ -59,8 +62,20 @@ class PostServiceImpl(
         return postRepository.findAllByUser(pageable, user).map{PostResponse(it)}
     }
 
-    override fun like(postId: Int, name: String?): Int {
-        //TODO implement
-        return postId!!
+    @Transactional
+    override fun like(postId: Int, userName: String?): Int {
+        if(userName == null) {
+            throw SnsApplicationException(ErrorCode.INVALID_PERMISSION, "userName is null")
+        }
+        val post:Post = postRepository.findById(postId) ?: throw SnsApplicationException(ErrorCode.POST_NOT_FOUND,"post($postId) is not founded")
+        val user:User = userRepository.findByUserName(userName) ?: throw SnsApplicationException(ErrorCode.USER_NOT_FOUND, "$userName is not founded")
+
+        val postLike : PostLike? = postLikeRepository.findByUserAndPost(user,post)
+        if(postLike != null) {
+            throw SnsApplicationException(ErrorCode.ALREADY_LIKED, "userName $userName already liked post $postId")
+        }
+
+        val result = postLikeRepository.save(PostLike(user, post))
+        return result.id!!
     }
 }

@@ -11,6 +11,7 @@ import com.hana.sns.post.controller.request.PostCreateRequest
 import com.hana.sns.post.controller.request.PostModifyRequest
 import com.hana.sns.post.controller.response.PostResponse
 import com.hana.sns.post.domain.Post
+import com.hana.sns.post.domain.PostLike
 import com.hana.sns.post.service.PostServiceImpl
 import com.hana.sns.user.controller.response.UserJoinResponse
 import com.hana.sns.user.domain.User
@@ -363,12 +364,11 @@ class PostControllerTest {
         val authentication = TestingAuthenticationToken(user.userName,user.password, mutableListOf(SimpleGrantedAuthority(UserRole.USER.toString())))
 
         //when
-        postController.like(savedPost.id!!, authentication)
+        val result = postController.like(savedPost.id!!, authentication)
 
         //then
-        //TODO SOMETHING
-        assertThat(true).isEqualTo(false)
-
+        assertThat(result.resultCode).isEqualTo("SUCCESS")
+        assertThat(result.result).isEqualTo(1)
     }
 
 
@@ -387,7 +387,7 @@ class PostControllerTest {
 
 
         //when & then
-        postController.like(savedPost.id!!, null!!)
+        val result = assertThrows<NullPointerException> { postController.like(savedPost.id!!, null!!) }
     }
 
 
@@ -406,7 +406,37 @@ class PostControllerTest {
         val authentication = TestingAuthenticationToken(user.userName,user.password, mutableListOf(SimpleGrantedAuthority(UserRole.USER.toString())))
 
         //when & then
-        postController.like(999999, authentication)
+        val result = assertThrows<SnsApplicationException> { postController.like(999999, authentication) }
+        assertThat(result.errorCode).isEqualTo(ErrorCode.POST_NOT_FOUND)
+        assertThat(result.message).isEqualTo("post(999999) is not founded")
+
+    }
+
+    @Test
+    fun 이미_좋아요_누른_게시글에_좋아요를_다시_누르면_예외를_발생시킨다() {
+        //given
+        val testContainer = TestContainer.build()
+        val postController = testContainer.postController
+        val postRepository = testContainer.postRepository
+        val userRepository = testContainer.userRepository
+        val passwordEncoder = testContainer.passwordEncoder
+        val postLikeRepository = testContainer.postLikeRepository
+
+
+        val user = User.fixture("userName",passwordEncoder.encode("password"))
+        val post = Post.fixture("title","body",user)
+
+        val savedUser: User = userRepository.save(user)
+        val savedPost: Post = postRepository.save(post)
+
+        postLikeRepository.save(PostLike(savedUser, savedPost))
+
+        val authentication = TestingAuthenticationToken(user.userName,user.password, mutableListOf(SimpleGrantedAuthority(UserRole.USER.toString())))
+
+        //when & then
+        val error = assertThrows<SnsApplicationException> { postController.like(savedPost.id!!, authentication) }
+        assertThat(error.errorCode).isEqualTo(ErrorCode.ALREADY_LIKED)
+        assertThat(error.message).isEqualTo("userName userName already liked post 1")
 
     }
 

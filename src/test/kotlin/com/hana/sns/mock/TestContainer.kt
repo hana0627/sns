@@ -10,6 +10,7 @@ class TestContainer(
 
     val userRepository: FakeUserRepository,
     val postRepository: FakePostRepository,
+    val postLikeRepository: FakePostLikeRepository,
 
 
     val userService: UserServiceImpl,
@@ -28,9 +29,10 @@ class TestContainer(
 
             val userRepository = FakeUserRepository()
             val postRepository = FakePostRepository()
+            val postLikeRepository = FakePostLikeRepository()
 
             val userService = UserServiceImpl(userRepository, passwordEncoder)
-            val postService = PostServiceImpl(postRepository, userRepository)
+            val postService = PostServiceImpl(postRepository, userRepository, postLikeRepository)
 
             val userController = UserController(userService)
             val postController = PostController(postService)
@@ -39,6 +41,7 @@ class TestContainer(
                 passwordEncoder,
                 userRepository,
                 postRepository,
+                postLikeRepository,
                 userService,
                 postService,
                 userController,

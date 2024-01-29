@@ -2,6 +2,7 @@ package com.hana.sns.post.controller
 
 import com.hana.sns.common.controller.response.Response
 import com.hana.sns.post.controller.port.PostService
+import com.hana.sns.post.controller.request.CommentCreateRequest
 import com.hana.sns.post.controller.request.PostCreateRequest
 import com.hana.sns.post.controller.request.PostModifyRequest
 import com.hana.sns.post.controller.response.PostResponse
@@ -58,4 +59,8 @@ class PostController(
         return Response.success(postService.likeCount(postId))
     }
 
+    @PostMapping("/api/v1/posts/{postId}/comments")
+    fun comment(@PathVariable postId: Long, @RequestBody request: CommentCreateRequest, authentication: Authentication):Response<Any> {
+        return Response.success(postService.comment(postId, authentication.name, request));
+    }
 }

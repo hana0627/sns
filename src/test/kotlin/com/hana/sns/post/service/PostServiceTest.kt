@@ -2,16 +2,16 @@ package com.hana.sns.post.service
 
 import com.hana.sns.common.exception.SnsApplicationException
 import com.hana.sns.common.exception.en.ErrorCode
-import com.hana.sns.mock.FakePasswordEncoder
-import com.hana.sns.mock.FakePostLikeRepository
-import com.hana.sns.mock.FakePostRepository
-import com.hana.sns.mock.FakeUserRepository
+import com.hana.sns.mock.*
+import com.hana.sns.post.controller.port.PostService
+import com.hana.sns.post.controller.request.CommentCreateRequest
 import com.hana.sns.post.controller.response.PostResponse
 import com.hana.sns.post.domain.Post
 import com.hana.sns.post.domain.PostLike
 import com.hana.sns.post.infrastructure.PostEntity
 import com.hana.sns.user.domain.User
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.data.domain.PageRequest
@@ -20,14 +20,26 @@ import java.lang.NullPointerException
 
 class PostServiceTest {
 
+    private lateinit var passwordEncoder: FakePasswordEncoder
+    private lateinit var userRepository: FakeUserRepository
+    private lateinit var postRepository: FakePostRepository
+    private lateinit var postLikeRepository: FakePostLikeRepository
+    private lateinit var commentRepository: FakeCommentRepository
+    private lateinit var postService: PostService
+
+    @BeforeEach
+    fun setUp() {
+        passwordEncoder = FakePasswordEncoder()
+        userRepository = FakeUserRepository()
+        postRepository = FakePostRepository()
+        postLikeRepository = FakePostLikeRepository()
+        commentRepository = FakeCommentRepository()
+        postService = PostServiceImpl(postRepository, userRepository, postLikeRepository, commentRepository)
+    }
+
     @Test
     fun 글작성이_성공하는_경우() {
         //given
-        val passwordEncoder = FakePasswordEncoder()
-        val userRepository = FakeUserRepository()
-        val postRepository = FakePostRepository()
-        val postLikeRepository = FakePostLikeRepository()
-        val postService = PostServiceImpl(postRepository, userRepository, postLikeRepository)
         val user = User.fixture("userName",passwordEncoder.encode("password"))
         userRepository.save(user)
 
@@ -47,12 +59,6 @@ class PostServiceTest {
     @Test
     fun 글작성시_요청한_유저가_없는_경우() {
         //given
-        val passwordEncoder = FakePasswordEncoder()
-        val userRepository = FakeUserRepository()
-        val postRepository = FakePostRepository()
-        val postLikeRepository = FakePostLikeRepository()
-        val postService = PostServiceImpl(postRepository, userRepository, postLikeRepository)
-
         val title: String = "title"
         val body: String = "postBody"
 
@@ -67,11 +73,6 @@ class PostServiceTest {
     @Test
     fun 글_수정이_성공하는_경우() {
         //given
-        val passwordEncoder = FakePasswordEncoder()
-        val userRepository = FakeUserRepository()
-        val postRepository = FakePostRepository()
-        val postLikeRepository = FakePostLikeRepository()
-        val postService = PostServiceImpl(postRepository, userRepository, postLikeRepository)
         val user = User.fixture("userName",passwordEncoder.encode("password"))
         val post = Post.fixture("title","body",user)
 
@@ -93,11 +94,6 @@ class PostServiceTest {
     @Test
     fun 로그인하지_않은_유저가_글_수정을_하는_경우_예외를_발생한다() {
         //given
-        val passwordEncoder = FakePasswordEncoder()
-        val userRepository = FakeUserRepository()
-        val postRepository = FakePostRepository()
-        val postLikeRepository = FakePostLikeRepository()
-        val postService = PostServiceImpl(postRepository, userRepository, postLikeRepository)
         val user = User.fixture("userName",passwordEncoder.encode("password"))
         val post = Post.fixture("title","body",user)
 
@@ -117,11 +113,6 @@ class PostServiceTest {
     @Test
     fun 글_수정시_본인이_작성한_글이_아니라면_예외를_발생한다() {
         //given
-        val passwordEncoder = FakePasswordEncoder()
-        val userRepository = FakeUserRepository()
-        val postRepository = FakePostRepository()
-        val postLikeRepository = FakePostLikeRepository()
-        val postService = PostServiceImpl(postRepository, userRepository, postLikeRepository)
         val user = User.fixture("userName",passwordEncoder.encode("password"))
         val post = Post.fixture("title","body",user)
 
@@ -140,11 +131,6 @@ class PostServiceTest {
     @Test
     fun 글_수정시_수정하려는_글이_없는경우_예외를_발생한다() {
         //given
-        val passwordEncoder = FakePasswordEncoder()
-        val userRepository = FakeUserRepository()
-        val postRepository = FakePostRepository()
-        val postLikeRepository = FakePostLikeRepository()
-        val postService = PostServiceImpl(postRepository, userRepository, postLikeRepository)
         val user = User.fixture("userName",passwordEncoder.encode("password"))
         val post = Post.fixture("title","body",user)
 
@@ -165,11 +151,6 @@ class PostServiceTest {
     @Test
     fun 글_삭제가_성공하는_경우() {
         //given
-        val passwordEncoder = FakePasswordEncoder()
-        val userRepository = FakeUserRepository()
-        val postRepository = FakePostRepository()
-        val postLikeRepository = FakePostLikeRepository()
-        val postService = PostServiceImpl(postRepository, userRepository, postLikeRepository)
         val user = User.fixture("userName",passwordEncoder.encode("password"))
         val post = Post.fixture("title","body",user)
 
@@ -188,11 +169,6 @@ class PostServiceTest {
     @Test
     fun 로그인하지_않은_유저가_글_삭제를_하는_경우_예외를_발생한다() {
         //given
-        val passwordEncoder = FakePasswordEncoder()
-        val userRepository = FakeUserRepository()
-        val postRepository = FakePostRepository()
-        val postLikeRepository = FakePostLikeRepository()
-        val postService = PostServiceImpl(postRepository, userRepository, postLikeRepository)
         val user = User.fixture("userName",passwordEncoder.encode("password"))
         val post = Post.fixture("title","body",user)
 
@@ -207,11 +183,6 @@ class PostServiceTest {
     @Test
     fun 글_삭제시_본인이_작성한_글이_아니라면_예외를_발생한다() {
         //given
-        val passwordEncoder = FakePasswordEncoder()
-        val userRepository = FakeUserRepository()
-        val postRepository = FakePostRepository()
-        val postLikeRepository = FakePostLikeRepository()
-        val postService = PostServiceImpl(postRepository, userRepository, postLikeRepository)
         val user = User.fixture("userName",passwordEncoder.encode("password"))
         val post = Post.fixture("title","body",user)
 
@@ -227,11 +198,6 @@ class PostServiceTest {
     @Test
     fun 글_삭제시_삭제하려는_글이_없는경우_예외를_발생한다() {
         //given
-        val passwordEncoder = FakePasswordEncoder()
-        val userRepository = FakeUserRepository()
-        val postRepository = FakePostRepository()
-        val postLikeRepository = FakePostLikeRepository()
-        val postService = PostServiceImpl(postRepository, userRepository, postLikeRepository)
         val user = User.fixture("userName",passwordEncoder.encode("password"))
         val post = Post.fixture("title","body",user)
 
@@ -248,11 +214,6 @@ class PostServiceTest {
     @Test
     fun 피드_목록요청이_성공한_경우() {
         //given
-        val passwordEncoder = FakePasswordEncoder()
-        val userRepository = FakeUserRepository()
-        val postRepository = FakePostRepository()
-        val postLikeRepository = FakePostLikeRepository()
-        val postService = PostServiceImpl(postRepository, userRepository, postLikeRepository)
         val user1 = User.fixture("userName1",passwordEncoder.encode("password"))
         val user2 = User.fixture("userName2",passwordEncoder.encode("password"))
         userRepository.save(user1)
@@ -280,11 +241,6 @@ class PostServiceTest {
     @Test
     fun 내_피드_목록요청이_성공한_경우() {
         //given
-        val passwordEncoder = FakePasswordEncoder()
-        val userRepository = FakeUserRepository()
-        val postRepository = FakePostRepository()
-        val postLikeRepository = FakePostLikeRepository()
-        val postService = PostServiceImpl(postRepository, userRepository, postLikeRepository)
         val user1 = User.fixture("userName1",passwordEncoder.encode("password"))
         val user2 = User.fixture("userName2",passwordEncoder.encode("password"))
         userRepository.save(user1)
@@ -316,11 +272,6 @@ class PostServiceTest {
     @Test
     fun 좋아요_기능_성공() {
         //given
-        val passwordEncoder = FakePasswordEncoder()
-        val userRepository = FakeUserRepository()
-        val postRepository = FakePostRepository()
-        val postLikeRepository = FakePostLikeRepository()
-        val postService = PostServiceImpl(postRepository, userRepository, postLikeRepository)
         val user = User.fixture("userName",passwordEncoder.encode("password"))
         val post = Post.fixture("title","body",user)
 
@@ -338,11 +289,6 @@ class PostServiceTest {
     @Test
     fun 좋아요기능시_유저가_로그인하지_않은_경우_예외를_발생한다() {
         //given
-        val passwordEncoder = FakePasswordEncoder()
-        val userRepository = FakeUserRepository()
-        val postRepository = FakePostRepository()
-        val postLikeRepository = FakePostLikeRepository()
-        val postService = PostServiceImpl(postRepository, userRepository, postLikeRepository)
         val user = User.fixture("userName",passwordEncoder.encode("password"))
         val post = Post.fixture("title","body",user)
 
@@ -357,11 +303,6 @@ class PostServiceTest {
     @Test
     fun 존재하지_않는_글에대해서_좋아요_요청시_예외를_발생한다() {
         //given
-        val passwordEncoder = FakePasswordEncoder()
-        val userRepository = FakeUserRepository()
-        val postRepository = FakePostRepository()
-        val postLikeRepository = FakePostLikeRepository()
-        val postService = PostServiceImpl(postRepository, userRepository, postLikeRepository)
         val user = User.fixture("userName",passwordEncoder.encode("password"))
         val post = Post.fixture("title","body",user)
 
@@ -379,11 +320,6 @@ class PostServiceTest {
     @Test
     fun 이미_좋아요_누른_게시글에_좋아요를_다시_누르면_예외를_발생시킨다() {
         //given
-        val passwordEncoder = FakePasswordEncoder()
-        val userRepository = FakeUserRepository()
-        val postRepository = FakePostRepository()
-        val postLikeRepository = FakePostLikeRepository()
-        val postService = PostServiceImpl(postRepository, userRepository, postLikeRepository)
         val user = User.fixture("userName",passwordEncoder.encode("password"))
         val post = Post.fixture("title","body",user)
 
@@ -402,11 +338,6 @@ class PostServiceTest {
     @Test
     fun 게시글_조회시_해당게시글의_좋아요_숫자도_함께_응답한다() {
         //given
-        val passwordEncoder = FakePasswordEncoder()
-        val userRepository = FakeUserRepository()
-        val postRepository = FakePostRepository()
-        val postLikeRepository = FakePostLikeRepository()
-        val postService = PostServiceImpl(postRepository, userRepository, postLikeRepository)
         val user1 = User.fixture("userName1",passwordEncoder.encode("password"))
         val user2 = User.fixture("userName2",passwordEncoder.encode("password"))
         val user3 = User.fixture("userName3",passwordEncoder.encode("password"))
@@ -426,6 +357,60 @@ class PostServiceTest {
 
         //then
         assertThat(result).isEqualTo(3)
+    }
+
+    @Test
+    fun 댓글작성_기능_성공() {
+        //given
+        val user = User.fixture("userName",passwordEncoder.encode("password"))
+        val post = Post.fixture("title","body",user)
+
+        val savedUser: User = userRepository.save(user)
+        val savedPost: Post = postRepository.save(post)
+        
+        val request = CommentCreateRequest("comment");
+
+        //when
+        val result: Long = postService.comment(savedPost.id!!, savedUser.userName, request)
+        val savedEntity = commentRepository.findById(result)
+        //then
+        assertThat(savedEntity).isNotNull
+        assertThat(savedEntity?.post?.id).isEqualTo(savedPost.id)
+        assertThat(savedEntity?.user?.id).isEqualTo(savedUser.id)
+        assertThat(savedEntity?.comment).isEqualTo("comment")
+
+    }
+
+    @Test
+    fun 댓글_작성시_유저가_로그인하지_않은_경우_예외를_발생한다() {
+        //given
+        val user = User.fixture("userName",passwordEncoder.encode("password"))
+        val post = Post.fixture("title","body",user)
+
+        postRepository.save(post)
+        val request = CommentCreateRequest("comment");
+
+        //when & then
+        val error = assertThrows<SnsApplicationException> { postService.comment(post.id!!, null, request) }
+        assertThat(error.errorCode).isEqualTo(ErrorCode.INVALID_PERMISSION)
+        assertThat(error.message).isEqualTo("userName is null")
+    }
+
+    @Test
+    fun 존재하지_않는_글에대해서_댓글_요청시_예외를_발생한다() {
+        //given
+        val user = User.fixture("userName",passwordEncoder.encode("password"))
+        val post = Post.fixture("title","body",user)
+
+        val savedUser: User = userRepository.save(user)
+        val savedPost: Post = postRepository.save(post)
+        val request = CommentCreateRequest("comment");
+
+        //when & then
+        val error = assertThrows<SnsApplicationException> { postService.comment(999999, savedUser.userName, request) }
+        assertThat(error.errorCode).isEqualTo(ErrorCode.POST_NOT_FOUND)
+        assertThat(error.message).isEqualTo("post(999999) is not founded")
+
     }
 
 

@@ -3,9 +3,12 @@ package com.hana.sns.post.service
 import com.hana.sns.common.exception.SnsApplicationException
 import com.hana.sns.common.exception.en.ErrorCode
 import com.hana.sns.post.controller.port.PostService
+import com.hana.sns.post.controller.request.CommentCreateRequest
 import com.hana.sns.post.controller.response.PostResponse
+import com.hana.sns.post.domain.Comment
 import com.hana.sns.post.domain.Post
 import com.hana.sns.post.domain.PostLike
+import com.hana.sns.post.service.port.CommentRepository
 import com.hana.sns.post.service.port.PostLikeRepository
 import com.hana.sns.post.service.port.PostRepository
 import com.hana.sns.user.domain.User
@@ -20,6 +23,7 @@ class PostServiceImpl(
     private val postRepository: PostRepository,
     private val userRepository: UserRepository,
     private val postLikeRepository: PostLikeRepository,
+    private val commentRepository: CommentRepository,
 ) : PostService {
     @Transactional
     override fun create(title: String, body: String, userName: String): Long{
@@ -83,5 +87,15 @@ class PostServiceImpl(
         val post: Post = postRepository.findById(postId) ?: throw SnsApplicationException(ErrorCode.POST_NOT_FOUND,"post($postId) is not founded")
 
         return postLikeRepository.countByPost(post)
+    }
+
+    override fun comment(postId: Long, userName: String?, request: CommentCreateRequest): Long {
+        if(userName == null) {
+            throw SnsApplicationException(ErrorCode.INVALID_PERMISSION, "userName is null")
+        }
+        val post:Post = postRepository.findById(postId) ?: throw SnsApplicationException(ErrorCode.POST_NOT_FOUND,"post($postId) is not founded")
+        val user:User = userRepository.findByUserName(userName) ?: throw SnsApplicationException(ErrorCode.USER_NOT_FOUND, "$userName is not founded")
+
+        return commentRepository.save(Comment(user, post, request)).id!!
     }
 }

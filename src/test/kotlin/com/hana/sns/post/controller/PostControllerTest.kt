@@ -3,35 +3,50 @@ package com.hana.sns.post.controller
 import com.hana.sns.common.controller.response.Response
 import com.hana.sns.common.exception.SnsApplicationException
 import com.hana.sns.common.exception.en.ErrorCode
-import com.hana.sns.mock.*
+import com.hana.sns.mock.FakeCommentRepository
+import com.hana.sns.mock.FakePostLikeRepository
+import com.hana.sns.mock.FakePostRepository
+import com.hana.sns.mock.TestContainer
+import com.hana.sns.post.controller.request.CommentCreateRequest
 import com.hana.sns.post.controller.request.PostCreateRequest
 import com.hana.sns.post.controller.request.PostModifyRequest
 import com.hana.sns.post.controller.response.PostResponse
 import com.hana.sns.post.domain.Post
 import com.hana.sns.post.domain.PostLike
-import com.hana.sns.post.service.PostServiceImpl
-import com.hana.sns.user.controller.response.UserJoinResponse
 import com.hana.sns.user.domain.User
 import com.hana.sns.user.domain.en.UserRole
+import com.hana.sns.user.service.port.UserRepository
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.springframework.data.domain.PageRequest
 import org.springframework.security.authentication.TestingAuthenticationToken
 import org.springframework.security.core.authority.SimpleGrantedAuthority
-import java.lang.NullPointerException
+import org.springframework.security.crypto.password.PasswordEncoder
 
 class PostControllerTest {
+    lateinit var testContainer: TestContainer
+    lateinit var userRepository: UserRepository
+    lateinit var postRepository: FakePostRepository
+    lateinit var postLikeRepository: FakePostLikeRepository
+    lateinit var commentRepository: FakeCommentRepository
+    lateinit var passwordEncoder: PasswordEncoder
+    lateinit var postController: PostController
 
-
+    @BeforeEach
+    fun setUp() {
+        testContainer = TestContainer.build()
+        userRepository = testContainer.userRepository
+        postRepository = testContainer.postRepository
+        postLikeRepository = testContainer.postLikeRepository
+        commentRepository = testContainer.commentRepository
+        passwordEncoder = testContainer.passwordEncoder
+        postController = testContainer.postController
+    }
     @Test
     fun 글작성_성공 () {
         //given
-        val testContainer = TestContainer.build()
-        val userRepository = testContainer.userRepository
-        val passwordEncoder = testContainer.passwordEncoder
-
         userRepository.save(User("userName",passwordEncoder.encode("password")))
 
         val postCreateRequest = PostCreateRequest("title", "body")
@@ -48,10 +63,6 @@ class PostControllerTest {
     @Test
     fun 글작성시_없는userName이라면_예외발생 () {
         //given
-        val testContainer = TestContainer.build()
-        val userRepository = testContainer.userRepository
-        val passwordEncoder = testContainer.passwordEncoder
-
         userRepository.save(User("userName",passwordEncoder.encode("password")))
 
         val postCreateRequest = PostCreateRequest("title", "body")
@@ -68,12 +79,6 @@ class PostControllerTest {
     @Test
     fun 글_수정이_성공하는_경우() {
         //given
-        val testContainer = TestContainer.build()
-        val postController = testContainer.postController
-        val userRepository = testContainer.userRepository
-        val postRepository = testContainer.postRepository
-        val passwordEncoder = testContainer.passwordEncoder
-
         val user = User.fixture("userName",passwordEncoder.encode("password"))
         val post = Post.fixture("title","body",user)
 
@@ -98,12 +103,6 @@ class PostControllerTest {
     @Test
     fun 로그인하지_않은_유저가_글_수정을_하는_경우_예외를_발생한다() {
         //given
-        val testContainer = TestContainer.build()
-        val postController = testContainer.postController
-        val userRepository = testContainer.userRepository
-        val postRepository = testContainer.postRepository
-        val passwordEncoder = testContainer.passwordEncoder
-
         val user = User.fixture("userName",passwordEncoder.encode("password"))
         val post = Post.fixture("title","body",user)
 
@@ -120,12 +119,6 @@ class PostControllerTest {
     @Test
     fun 글_수정시_본인이_작성한_글이_아니라면_예외를_발생한다() {
         //given
-        val testContainer = TestContainer.build()
-        val postController = testContainer.postController
-        val userRepository = testContainer.userRepository
-        val postRepository = testContainer.postRepository
-        val passwordEncoder = testContainer.passwordEncoder
-
         val user = User.fixture("userName",passwordEncoder.encode("password"))
         val post = Post.fixture("title","body",user)
 
@@ -148,12 +141,6 @@ class PostControllerTest {
     @Test
     fun 글_수정시_수정하려는_글이_없는경우_예외를_발생한다() {
         //given
-        val testContainer = TestContainer.build()
-        val postController = testContainer.postController
-        val userRepository = testContainer.userRepository
-        val postRepository = testContainer.postRepository
-        val passwordEncoder = testContainer.passwordEncoder
-
         val user = User.fixture("userName",passwordEncoder.encode("password"))
         val post = Post.fixture("title","body",user)
 
@@ -179,12 +166,6 @@ class PostControllerTest {
     @Test
     fun 글_삭제가_성공하는_경우() {
         //given
-        val testContainer = TestContainer.build()
-        val postController = testContainer.postController
-        val userRepository = testContainer.userRepository
-        val postRepository = testContainer.postRepository
-        val passwordEncoder = testContainer.passwordEncoder
-
         val user = User.fixture("userName",passwordEncoder.encode("password"))
         val post = Post.fixture("title","body",user)
 
@@ -205,12 +186,6 @@ class PostControllerTest {
     @Test
     fun 로그인하지_않은_유저가_글_삭제를_하는_경우_예외를_발생한다() {
         //given
-        val testContainer = TestContainer.build()
-        val postController = testContainer.postController
-        val userRepository = testContainer.userRepository
-        val postRepository = testContainer.postRepository
-        val passwordEncoder = testContainer.passwordEncoder
-
         val user = User.fixture("userName",passwordEncoder.encode("password"))
         val post = Post.fixture("title","body",user)
 
@@ -223,12 +198,6 @@ class PostControllerTest {
     @Test
     fun 글_삭제시_본인이_작성한_글이_아니라면_예외를_발생한다() {
         //given
-        val testContainer = TestContainer.build()
-        val postController = testContainer.postController
-        val userRepository = testContainer.userRepository
-        val postRepository = testContainer.postRepository
-        val passwordEncoder = testContainer.passwordEncoder
-
         val user = User.fixture("userName",passwordEncoder.encode("password"))
         val post = Post.fixture("title","body",user)
 
@@ -247,12 +216,6 @@ class PostControllerTest {
     @Test
     fun 글_삭제시_삭제하려는_글이_없는경우_예외를_발생한다() {
         //given
-        val testContainer = TestContainer.build()
-        val postController = testContainer.postController
-        val userRepository = testContainer.userRepository
-        val postRepository = testContainer.postRepository
-        val passwordEncoder = testContainer.passwordEncoder
-
         val user = User.fixture("userName",passwordEncoder.encode("password"))
         val post = Post.fixture("title","body",user)
 
@@ -273,12 +236,6 @@ class PostControllerTest {
     @Test
     fun 피드_목록요청이_성공한_경우() {
         //given
-        val testContainer = TestContainer.build()
-        val postController = testContainer.postController
-        val userRepository = testContainer.userRepository
-        val postRepository = testContainer.postRepository
-        val passwordEncoder = testContainer.passwordEncoder
-
         val user1 = User.fixture("userName1",passwordEncoder.encode("password"))
         val user2 = User.fixture("userName2",passwordEncoder.encode("password"))
         userRepository.save(user1)
@@ -309,12 +266,6 @@ class PostControllerTest {
     @Test
     fun 내_피드목록_요청이_성공한_경우() {
         //given
-        val testContainer = TestContainer.build()
-        val postController = testContainer.postController
-        val userRepository = testContainer.userRepository
-        val postRepository = testContainer.postRepository
-        val passwordEncoder = testContainer.passwordEncoder
-
         val user1 = User.fixture("userName1",passwordEncoder.encode("password"))
         val user2 = User.fixture("userName2",passwordEncoder.encode("password"))
         userRepository.save(user1)
@@ -346,12 +297,6 @@ class PostControllerTest {
     @Test
     fun 좋아요_기능_성공() {
         //given
-        val testContainer = TestContainer.build()
-        val postController = testContainer.postController
-        val userRepository = testContainer.userRepository
-        val postRepository = testContainer.postRepository
-        val passwordEncoder = testContainer.passwordEncoder
-
         val user = User.fixture("userName",passwordEncoder.encode("password"))
         val post = Post.fixture("title","body",user)
 
@@ -372,11 +317,6 @@ class PostControllerTest {
     @Test
     fun 좋아요기능시_유저가_로그인하지_않은_경우_예외를_발생한다() {
         //given
-        val testContainer = TestContainer.build()
-        val postController = testContainer.postController
-        val postRepository = testContainer.postRepository
-        val passwordEncoder = testContainer.passwordEncoder
-
         val user = User.fixture("userName",passwordEncoder.encode("password"))
         val post = Post.fixture("title","body",user)
 
@@ -391,11 +331,6 @@ class PostControllerTest {
     @Test
     fun 존재하지_않는_글에대해서_좋아요_요청시_예외를_발생한다() {
         //given
-        val testContainer = TestContainer.build()
-        val postController = testContainer.postController
-        val userRepository = testContainer.userRepository
-        val passwordEncoder = testContainer.passwordEncoder
-
         val user = User.fixture("userName",passwordEncoder.encode("password"))
 
         val savedUser: User = userRepository.save(user)
@@ -412,14 +347,6 @@ class PostControllerTest {
     @Test
     fun 이미_좋아요_누른_게시글에_좋아요를_다시_누르면_예외를_발생시킨다() {
         //given
-        val testContainer = TestContainer.build()
-        val postController = testContainer.postController
-        val postRepository = testContainer.postRepository
-        val userRepository = testContainer.userRepository
-        val passwordEncoder = testContainer.passwordEncoder
-        val postLikeRepository = testContainer.postLikeRepository
-
-
         val user = User.fixture("userName",passwordEncoder.encode("password"))
         val post = Post.fixture("title","body",user)
 
@@ -441,13 +368,6 @@ class PostControllerTest {
     @Test
     fun 게시글_조회시_해당게시글의_좋아요_숫자도_함께_응답한다() {
         //given
-        val testContainer = TestContainer.build()
-        val postController = testContainer.postController
-        val userRepository = testContainer.userRepository
-        val postRepository = testContainer.postRepository
-        val postLikeRepository = testContainer.postLikeRepository
-        val passwordEncoder = testContainer.passwordEncoder
-
         val user1 = User.fixture("userName1",passwordEncoder.encode("password"))
         val user2 = User.fixture("userName2",passwordEncoder.encode("password"))
         val user3 = User.fixture("userName3",passwordEncoder.encode("password"))
@@ -470,4 +390,63 @@ class PostControllerTest {
         assertThat(result.result).isEqualTo(3L)
     }
 
+
+    @Test
+    fun 댓글작성_기능_성공() {
+        //given
+        val user = User.fixture("userName",passwordEncoder.encode("password"))
+        val post = Post.fixture("title","body",user)
+
+        val savedUser: User = userRepository.save(user)
+        val savedPost: Post = postRepository.save(post)
+
+        val request = CommentCreateRequest("comment");
+        val authentication = TestingAuthenticationToken(user.userName,user.password, mutableListOf(SimpleGrantedAuthority(UserRole.USER.toString())))
+
+        //when
+        val success = postController.comment(savedPost.id!!, request, authentication)
+
+        //then
+        val result = commentRepository.findById(success.result.toString().toLong())
+        assertThat(result).isNotNull
+        assertThat(result?.post?.id).isEqualTo(savedPost.id)
+        assertThat(result?.post?.title).isEqualTo(savedPost.title)
+        assertThat(result?.post?.body).isEqualTo(savedPost.body)
+        assertThat(result?.user?.userName).isEqualTo(savedUser.userName)
+
+        assertThat(success.resultCode).isEqualTo("SUCCESS")
+        assertThat(success.result).isEqualTo(1L)
+
+    }
+
+    @Test
+    fun 댓글_작성시_유저가_로그인하지_않은_경우_예외를_발생한다() {
+        //given
+        val user = User.fixture("userName",passwordEncoder.encode("password"))
+        val post = Post.fixture("title","body",user)
+
+        postRepository.save(post)
+        val request = CommentCreateRequest("comment");
+
+        //when & then
+        val error = assertThrows<NullPointerException> { postController.comment(post.id!!, request, null!!) }
+    }
+
+    @Test
+    fun 존재하지_않는_글에대해서_댓글_요청시_예외를_발생한다() {
+        //given
+        val user = User.fixture("userName",passwordEncoder.encode("password"))
+        val post = Post.fixture("title","body",user)
+
+        val savedUser: User = userRepository.save(user)
+        val savedPost: Post = postRepository.save(post)
+        val request = CommentCreateRequest("comment");
+        val authentication = TestingAuthenticationToken(user.userName,user.password, mutableListOf(SimpleGrantedAuthority(UserRole.USER.toString())))
+
+        //when & then
+        val error = assertThrows<SnsApplicationException> { postController.comment(999999, request, authentication) }
+        assertThat(error.errorCode).isEqualTo(ErrorCode.POST_NOT_FOUND)
+        assertThat(error.message).isEqualTo("post(999999) is not founded")
+
+    }
 }

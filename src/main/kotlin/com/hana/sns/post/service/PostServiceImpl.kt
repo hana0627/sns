@@ -4,6 +4,7 @@ import com.hana.sns.common.exception.SnsApplicationException
 import com.hana.sns.common.exception.en.ErrorCode
 import com.hana.sns.post.controller.port.PostService
 import com.hana.sns.post.controller.request.CommentCreateRequest
+import com.hana.sns.post.controller.response.CommentResponse
 import com.hana.sns.post.controller.response.PostResponse
 import com.hana.sns.post.domain.Comment
 import com.hana.sns.post.domain.Post
@@ -51,7 +52,6 @@ class PostServiceImpl(
         if(post.user.userName != userName) {
             throw SnsApplicationException(ErrorCode.INVALID_PERMISSION,"$userName has no permission with post($postId)")
         }
-        //TODO delete 벌크연산 -> N+1문제 유의주시
         postRepository.delete(post)
 
         return postId
@@ -89,13 +89,18 @@ class PostServiceImpl(
         return postLikeRepository.countByPost(post)
     }
 
-    override fun comment(postId: Long, userName: String?, request: CommentCreateRequest): Long {
+    override fun comment(postId: Long, userName: String?, comment: String): Long {
         if(userName == null) {
             throw SnsApplicationException(ErrorCode.INVALID_PERMISSION, "userName is null")
         }
         val post:Post = postRepository.findById(postId) ?: throw SnsApplicationException(ErrorCode.POST_NOT_FOUND,"post($postId) is not founded")
         val user:User = userRepository.findByUserName(userName) ?: throw SnsApplicationException(ErrorCode.USER_NOT_FOUND, "$userName is not founded")
 
-        return commentRepository.save(Comment(user, post, request)).id!!
+        return commentRepository.save(Comment(user, post, comment)).id!!
+    }
+
+    override fun getComments(postId: Long, pageable: Pageable): Page<CommentResponse> {
+        val post:Post = postRepository.findById(postId) ?: throw SnsApplicationException(ErrorCode.POST_NOT_FOUND,"post($postId) is not founded")
+        return commentRepository.findAllByPost(post, pageable).map { CommentResponse(it) };
     }
 }

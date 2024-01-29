@@ -5,7 +5,9 @@ import com.hana.sns.common.exception.en.ErrorCode
 import com.hana.sns.mock.*
 import com.hana.sns.post.controller.port.PostService
 import com.hana.sns.post.controller.request.CommentCreateRequest
+import com.hana.sns.post.controller.response.CommentResponse
 import com.hana.sns.post.controller.response.PostResponse
+import com.hana.sns.post.domain.Comment
 import com.hana.sns.post.domain.Post
 import com.hana.sns.post.domain.PostLike
 import com.hana.sns.post.infrastructure.PostEntity
@@ -17,6 +19,7 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import java.lang.NullPointerException
+import kotlin.streams.toList
 
 class PostServiceTest {
 
@@ -368,10 +371,10 @@ class PostServiceTest {
         val savedUser: User = userRepository.save(user)
         val savedPost: Post = postRepository.save(post)
         
-        val request = CommentCreateRequest("comment");
+        val comment = "comment"
 
         //when
-        val result: Long = postService.comment(savedPost.id!!, savedUser.userName, request)
+        val result: Long = postService.comment(savedPost.id!!, savedUser.userName, comment)
         val savedEntity = commentRepository.findById(result)
         //then
         assertThat(savedEntity).isNotNull
@@ -388,10 +391,10 @@ class PostServiceTest {
         val post = Post.fixture("title","body",user)
 
         postRepository.save(post)
-        val request = CommentCreateRequest("comment");
+        val comment = "comment"
 
         //when & then
-        val error = assertThrows<SnsApplicationException> { postService.comment(post.id!!, null, request) }
+        val error = assertThrows<SnsApplicationException> { postService.comment(post.id!!, null, comment) }
         assertThat(error.errorCode).isEqualTo(ErrorCode.INVALID_PERMISSION)
         assertThat(error.message).isEqualTo("userName is null")
     }
@@ -404,14 +407,57 @@ class PostServiceTest {
 
         val savedUser: User = userRepository.save(user)
         val savedPost: Post = postRepository.save(post)
-        val request = CommentCreateRequest("comment");
+        val comment = "comment"
 
         //when & then
-        val error = assertThrows<SnsApplicationException> { postService.comment(999999, savedUser.userName, request) }
+        val error = assertThrows<SnsApplicationException> { postService.comment(999999, savedUser.userName, comment) }
         assertThat(error.errorCode).isEqualTo(ErrorCode.POST_NOT_FOUND)
         assertThat(error.message).isEqualTo("post(999999) is not founded")
 
     }
 
+    @Test
+    fun 댓글_목록_요청이_성공한_경우() {
+        //given
+
+        val savedPost: Post = postRepository.save(Post.fixture())
+        for(i in 0..29) {
+            val user = User.fixture("userName$i",passwordEncoder.encode("password"))
+            userRepository.save(user)
+            commentRepository.save(Comment(user,savedPost,"comments$i"))
+        }
+
+
+        val pageable = PageRequest.of(1,10)
+        //when
+        val result: List<CommentResponse> = postService.getComments(savedPost.id!!, pageable).get().toList()
+
+        //then
+        assertThat(result.size).isEqualTo(10)
+        assertThat(result[1].post.id).isEqualTo(savedPost.id)
+        assertThat(result[1].post.body).isEqualTo(savedPost.body)
+        assertThat(result[1].comment).isEqualTo("comments11")
+        assertThat(result[1].user.userName).isEqualTo("userName11")
+    }
+
+    @Test
+    fun 없는_게시글에_대한_댓글을_요청할_경우() {
+        //given
+        val savedPost: Post = postRepository.save(Post.fixture())
+        for(i in 0..5) {
+            val user = User.fixture("userName$i",passwordEncoder.encode("password"))
+            userRepository.save(user)
+            commentRepository.save(Comment(user,savedPost,"comment$i"))
+        }
+
+
+        val pageable = PageRequest.of(1,10)
+        //when & then
+        val error = assertThrows<SnsApplicationException> { postService.getComments(999999, pageable).get().toList() }
+
+        assertThat(error.errorCode).isEqualTo(ErrorCode.POST_NOT_FOUND)
+        assertThat(error.message).isEqualTo("post(999999) is not founded")
+    }
+    
 
 }

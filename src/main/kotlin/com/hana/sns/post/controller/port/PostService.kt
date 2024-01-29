@@ -1,6 +1,7 @@
 package com.hana.sns.post.controller.port
 
 import com.hana.sns.post.controller.request.CommentCreateRequest
+import com.hana.sns.post.controller.response.CommentResponse
 import com.hana.sns.post.controller.response.PostResponse
 import com.hana.sns.post.domain.Post
 import org.springframework.data.domain.Page
@@ -15,5 +16,6 @@ interface PostService {
     fun my(pageable: Pageable, userName: String): Page<PostResponse>
     fun like(postId: Long, userName: String?): Long
     fun likeCount(postId: Long): Long
-    fun comment(postId: Long, userName: String?, request: CommentCreateRequest): Long
+    fun comment(postId: Long, userName: String?, comment: String): Long
+    fun getComments(postId: Long, pageable: Pageable): Page<CommentResponse>
 }

@@ -11,6 +11,7 @@ import com.hana.sns.post.controller.request.CommentCreateRequest
 import com.hana.sns.post.controller.request.PostCreateRequest
 import com.hana.sns.post.controller.request.PostModifyRequest
 import com.hana.sns.post.controller.response.PostResponse
+import com.hana.sns.post.domain.Comment
 import com.hana.sns.post.domain.Post
 import com.hana.sns.post.domain.PostLike
 import com.hana.sns.user.domain.User
@@ -449,4 +450,50 @@ class PostControllerTest {
         assertThat(error.message).isEqualTo("post(999999) is not founded")
 
     }
+
+    @Test
+    fun 댓글_목록_요청이_성공한_경우() {
+        //given
+        val savedPost: Post = postRepository.save(Post.fixture())
+        val user = User.fixture("userName",passwordEncoder.encode("password"))
+        userRepository.save(user)
+
+        for(i in 0..29) {
+            val user = User.fixture("userName$i",passwordEncoder.encode("password"))
+            userRepository.save(user)
+            commentRepository.save(Comment(user,savedPost,"comments$i"))
+        }
+        val pageable = PageRequest.of(0,10)
+
+        //when
+        val result = postController.comments(savedPost.id!!, pageable)
+
+        //then
+        assertThat(result.resultCode).isEqualTo("SUCCESS")
+        assertThat(result.result.toList().size).isEqualTo(10)
+        assertThat(result.result.toList()[0].post.id).isEqualTo(1L)
+        assertThat(result.result.toList()[1].user.userName).isEqualTo("userName1")
+        assertThat(result.result.toList()[1].comment).isEqualTo("comments1")
+    }
+
+    @Test
+    fun 없는_게시글에_대한_댓글을_요청할_경우() {
+        //given
+        val savedPost: Post = postRepository.save(Post.fixture())
+        val user = User.fixture("userName",passwordEncoder.encode("password"))
+        userRepository.save(user)
+
+        for(i in 0..5) {
+            val user = User.fixture("userName$i",passwordEncoder.encode("password"))
+            userRepository.save(user)
+            commentRepository.save(Comment(user,savedPost,"comments$i"))
+        }
+        val pageable = PageRequest.of(0,10)
+
+        //when & then
+        val error = assertThrows<SnsApplicationException> { postController.comments(999999, pageable) }
+        assertThat(error.errorCode).isEqualTo(ErrorCode.POST_NOT_FOUND)
+        assertThat(error.message).isEqualTo("post(999999) is not founded")
+    }
+
 }

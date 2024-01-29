@@ -5,6 +5,7 @@ import com.hana.sns.post.controller.port.PostService
 import com.hana.sns.post.controller.request.CommentCreateRequest
 import com.hana.sns.post.controller.request.PostCreateRequest
 import com.hana.sns.post.controller.request.PostModifyRequest
+import com.hana.sns.post.controller.response.CommentResponse
 import com.hana.sns.post.controller.response.PostResponse
 import lombok.RequiredArgsConstructor
 import org.springframework.data.domain.Page
@@ -61,6 +62,10 @@ class PostController(
 
     @PostMapping("/api/v1/posts/{postId}/comments")
     fun comment(@PathVariable postId: Long, @RequestBody request: CommentCreateRequest, authentication: Authentication):Response<Any> {
-        return Response.success(postService.comment(postId, authentication.name, request));
+        return Response.success(postService.comment(postId, authentication.name, request.comment));
+    }
+    @GetMapping("/api/v1/posts/{postId}/comments")
+    fun comments(@PathVariable postId: Long, pageable: Pageable):Response<Page<CommentResponse>> {
+        return Response.success(postService.getComments(postId, pageable));
     }
 }

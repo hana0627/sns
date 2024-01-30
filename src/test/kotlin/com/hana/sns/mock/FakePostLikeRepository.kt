@@ -34,4 +34,13 @@ class FakePostLikeRepository : PostLikeRepository {
     override fun countByPost(post: Post): Long {
         return data.filter { it.post == post }.size.toLong()
     }
+
+    override fun deleteAllByPost(post: Post) {
+        data.removeIf { it.post == post }
+    }
+
+    fun findAll(): List<PostLike> {
+        return data
+    }
+
 }

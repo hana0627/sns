@@ -21,4 +21,8 @@ class CommentRepositoryImpl(
     override fun findAllByPost(post: Post, pageable: Pageable): Page<Comment> {
         return commentJpaRepository.findAllByPost(pageable, PostEntity(post)).map { Comment(it) }
     }
+
+    override fun deleteAllByPost(post: Post) {
+        return commentJpaRepository.deleteAllByPost(PostEntity(post))
+    }
 }

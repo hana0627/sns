@@ -12,7 +12,11 @@ import com.hana.sns.post.domain.PostLike
 import com.hana.sns.post.service.port.CommentRepository
 import com.hana.sns.post.service.port.PostLikeRepository
 import com.hana.sns.post.service.port.PostRepository
+import com.hana.sns.user.domain.Alarm
 import com.hana.sns.user.domain.User
+import com.hana.sns.user.domain.arg.AlarmArgs
+import com.hana.sns.user.domain.en.AlarmType
+import com.hana.sns.user.service.port.AlarmRepository
 import com.hana.sns.user.service.port.UserRepository
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -25,6 +29,7 @@ class PostServiceImpl(
     private val userRepository: UserRepository,
     private val postLikeRepository: PostLikeRepository,
     private val commentRepository: CommentRepository,
+    private val alarmRepository: AlarmRepository,
 ) : PostService {
     @Transactional
     override fun create(title: String, body: String, userName: String): Long{
@@ -52,6 +57,8 @@ class PostServiceImpl(
         if(post.user.userName != userName) {
             throw SnsApplicationException(ErrorCode.INVALID_PERMISSION,"$userName has no permission with post($postId)")
         }
+        postLikeRepository.deleteAllByPost(post)
+        commentRepository.deleteAllByPost(post)
         postRepository.delete(post)
 
         return postId
@@ -79,6 +86,9 @@ class PostServiceImpl(
             throw SnsApplicationException(ErrorCode.ALREADY_LIKED, "userName $userName already liked post $postId")
         }
 
+        val alarm = Alarm(user,AlarmType.NEW_LIKE_ON_POST, AlarmArgs(user.id!!, post.user.id!!, post.id!!))
+        alarmRepository.save(alarm)
+
         val result = postLikeRepository.save(PostLike(user, post))
         return result.id!!
     }
@@ -95,6 +105,10 @@ class PostServiceImpl(
         }
         val post:Post = postRepository.findById(postId) ?: throw SnsApplicationException(ErrorCode.POST_NOT_FOUND,"post($postId) is not founded")
         val user:User = userRepository.findByUserName(userName) ?: throw SnsApplicationException(ErrorCode.USER_NOT_FOUND, "$userName is not founded")
+
+
+        val alarm = Alarm(user,AlarmType.NEW_COMMENT_ON_POST, AlarmArgs(user.id!!, post.user.id!!, post.id!!))
+        alarmRepository.save(alarm)
 
         return commentRepository.save(Comment(user, post, comment)).id!!
     }

@@ -1,5 +1,6 @@
 package com.hana.sns.user.infrastructure.alarm
 
+import com.hana.sns.user.domain.Alarm
 import com.hana.sns.user.domain.arg.AlarmArgs
 import com.hana.sns.user.domain.en.AlarmType
 import com.hana.sns.user.infrastructure.UserEntity
@@ -24,7 +25,7 @@ class AlarmEntity (
     @Enumerated(EnumType.STRING)
     val alarmType: AlarmType,
 
-    @Column(name = "alarm_args", columnDefinition = "json")
+    @Column(name = "args", columnDefinition = "json")
     @JdbcTypeCode(SqlTypes.JSON)
     val alarmArgs: AlarmArgs,
 
@@ -44,6 +45,18 @@ class AlarmEntity (
 
 
     ){
+
+
+    constructor(alarm: Alarm) : this(
+        UserEntity(alarm.user),
+        alarm.alarmType,
+        alarm.args,
+        alarm.registeredAt,
+        alarm.updatedAt,
+        alarm.deletedAt,
+        alarm.id,
+    )
+
 
     @PrePersist
     fun registeredAt() {

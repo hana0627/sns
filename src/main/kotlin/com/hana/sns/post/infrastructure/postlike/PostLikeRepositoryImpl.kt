@@ -33,4 +33,8 @@ class PostLikeRepositoryImpl (
         return postLikeQueryRepository.countByPost(post)
     }
 
+    override fun deleteAllByPost(post: Post) {
+        return postLikeJpaRepository.deleteAllByPost(PostEntity(post))
+    }
+
 }

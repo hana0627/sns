@@ -9,4 +9,5 @@ interface PostLikeRepository {
     fun findByUserAndPost(user: User, post: Post): PostLike?
     fun save(postLike: PostLike): PostLike
     fun countByPost(post: Post) : Long
+    fun deleteAllByPost(post: Post)
 }

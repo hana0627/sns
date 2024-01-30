@@ -8,4 +8,5 @@ import org.springframework.data.domain.Pageable
 interface CommentRepository {
     fun save(comment: Comment): Comment
     fun findAllByPost(post: Post, pageable: Pageable): Page<Comment>
+    fun deleteAllByPost(post: Post)
 }

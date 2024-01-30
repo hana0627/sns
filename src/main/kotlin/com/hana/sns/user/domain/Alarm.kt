@@ -9,13 +9,13 @@ data class Alarm(
     val user: User,
     val alarmType: AlarmType,
     val args: AlarmArgs,
-    val registeredAt: LocalDateTime?,
-    val updatedAt: LocalDateTime?,
-    val deletedAt: LocalDateTime?,
-    val id: Long? = null,
-    ) {
+    var registeredAt: LocalDateTime? = null,
+    var updatedAt: LocalDateTime? = null,
+    var deletedAt: LocalDateTime? = null,
+    var id: Long? = null,
+) {
 
-    constructor(alarmEntity: AlarmEntity): this(
+    constructor(alarmEntity: AlarmEntity) : this(
         User(alarmEntity.user),
         alarmEntity.alarmType,
         alarmEntity.alarmArgs,
@@ -25,4 +25,28 @@ data class Alarm(
         alarmEntity.id
     )
 
+
+    companion object {
+        fun fixture(
+            user: User = User("userName","password"),
+            alarmType: AlarmType = AlarmType.NEW_COMMENT_ON_POST,
+            args: AlarmArgs = AlarmArgs(1L, 2L, 1L),
+            registeredAt: LocalDateTime? = null,
+            updatedAt: LocalDateTime? = null,
+            deletedAt: LocalDateTime? = null,
+            id: Long? = null,
+        ) : Alarm {
+            return Alarm(
+                user,
+                alarmType,
+                args,
+                registeredAt,
+                updatedAt,
+                deletedAt,
+                id
+            )
+
+        }
+
+    }
 }

@@ -35,8 +35,16 @@ class FakeCommentRepository : CommentRepository {
         return PageImpl(sublist, pageable, data.size.toLong())
     }
 
+    override fun deleteAllByPost(post: Post) {
+        data.removeIf{ it.post == post }
+    }
+
     fun findById(id: Long): Comment? {
         return data.find { it.id == id }
+    }
+
+    fun findAll(): List<Comment> {
+        return data
     }
 
 }

@@ -4,22 +4,17 @@ import com.hana.sns.common.exception.SnsApplicationException
 import com.hana.sns.common.exception.en.ErrorCode
 import com.hana.sns.mock.*
 import com.hana.sns.post.controller.port.PostService
-import com.hana.sns.post.controller.request.CommentCreateRequest
 import com.hana.sns.post.controller.response.CommentResponse
 import com.hana.sns.post.controller.response.PostResponse
 import com.hana.sns.post.domain.Comment
 import com.hana.sns.post.domain.Post
 import com.hana.sns.post.domain.PostLike
-import com.hana.sns.post.infrastructure.PostEntity
 import com.hana.sns.user.domain.User
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.data.domain.PageRequest
-import org.springframework.data.domain.Pageable
-import java.lang.NullPointerException
-import kotlin.streams.toList
 
 class PostServiceTest {
 
@@ -28,6 +23,7 @@ class PostServiceTest {
     private lateinit var postRepository: FakePostRepository
     private lateinit var postLikeRepository: FakePostLikeRepository
     private lateinit var commentRepository: FakeCommentRepository
+    private lateinit var alramRepository: FakeAlarmRepository
     private lateinit var postService: PostService
 
     @BeforeEach
@@ -37,7 +33,8 @@ class PostServiceTest {
         postRepository = FakePostRepository()
         postLikeRepository = FakePostLikeRepository()
         commentRepository = FakeCommentRepository()
-        postService = PostServiceImpl(postRepository, userRepository, postLikeRepository, commentRepository)
+        alramRepository = FakeAlarmRepository()
+        postService = PostServiceImpl(postRepository, userRepository, postLikeRepository, commentRepository, alramRepository)
     }
 
     @Test
@@ -154,18 +151,34 @@ class PostServiceTest {
     @Test
     fun 글_삭제가_성공하는_경우() {
         //given
-        val user = User.fixture("userName",passwordEncoder.encode("password"))
-        val post = Post.fixture("title","body",user)
+        val user1 = User.fixture("userName1",passwordEncoder.encode("password"))
+        val user2 = User.fixture("userName2",passwordEncoder.encode("password"))
+        val user3 = User.fixture("userName3",passwordEncoder.encode("password"))
+        val post = Post.fixture("title","body",user1)
 
-        val savedUser: User = userRepository.save(user)
+        val savedUser: User = userRepository.save(user1)
         val savedPost: Post = postRepository.save(post)
 
+        commentRepository.save(Comment(user1, post, "comment1!"))
+        commentRepository.save(Comment(user2, post, "comment2!"))
+        postLikeRepository.save(PostLike(user1, post))
+        postLikeRepository.save(PostLike(user2, post))
+        // val beforeComments = commentRepository.findAll()
+        // val beforeLikes = postLikeRepository.findAll()
+        // assertThat(beforeComments.size).isEqualTo(2)
+        // assertThat(beforeLikes.size).isEqualTo(2)
 
         //when
         postService.delete(savedPost.id!!, savedUser.userName)
 
         //then
         val result = postRepository.findAll().size
+
+        val pageable = PageRequest.of(0,10)
+        val afterComments = commentRepository.findAll()
+        val afterLikes = postLikeRepository.findAll()
+        assertThat(afterComments.size).isEqualTo(0)
+        assertThat(afterLikes.size).isEqualTo(0)
         assertThat(result).isEqualTo(0)
     }
 
@@ -275,18 +288,22 @@ class PostServiceTest {
     @Test
     fun 좋아요_기능_성공() {
         //given
-        val user = User.fixture("userName",passwordEncoder.encode("password"))
-        val post = Post.fixture("title","body",user)
+        val user1 = User.fixture("userName1",passwordEncoder.encode("password"))
+        val user2 = User.fixture("userName2",passwordEncoder.encode("password"))
+        val post = Post.fixture("title","body",user1)
 
-        val savedUser: User = userRepository.save(user)
+        val savedUser: User = userRepository.save(user1)
+        val savedUser2: User = userRepository.save(user2)
         val savedPost: Post = postRepository.save(post)
 
         //when
-        val id = postService.like(post.id!!, user.userName)
+        val id = postService.like(post.id!!, user2.userName)
 
         //then
         val result = postLikeRepository.findById(id)
+        val alarm = alramRepository.findAll()
         assertThat(result).isNotNull
+        assertThat(alarm.size).isEqualTo(1)
     }
 
     @Test

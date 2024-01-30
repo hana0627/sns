@@ -7,4 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository
 
 interface CommentJpaRepository : JpaRepository<CommentEntity, Long>{
     fun findAllByPost(pageable: Pageable, postEntity: PostEntity): Page<CommentEntity>
+    fun deleteAllByPost(post: PostEntity)
 }

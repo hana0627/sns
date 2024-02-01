@@ -3,7 +3,6 @@ package com.hana.sns.post.service
 import com.hana.sns.common.exception.SnsApplicationException
 import com.hana.sns.common.exception.en.ErrorCode
 import com.hana.sns.post.controller.port.PostService
-import com.hana.sns.post.controller.request.CommentCreateRequest
 import com.hana.sns.post.controller.response.CommentResponse
 import com.hana.sns.post.controller.response.PostResponse
 import com.hana.sns.post.domain.Comment
@@ -33,15 +32,14 @@ class PostServiceImpl(
 ) : PostService {
     @Transactional
     override fun create(title: String, body: String, userName: String): Long{
-        val user: User = userRepository.findByUserName(userName)?: throw SnsApplicationException(ErrorCode.USER_NOT_FOUND, "$userName is not founded")
-
+        val user: User = getUserByUserNameOrException(userName)
         val post = Post(title, body, user)
         return postRepository.save(post).id!!
     }
 
     override fun modify(postId: Long, title: String, body: String, userName: String): Post {
         // 포스트존재여부
-        val post: Post = postRepository.findById(postId)?: throw SnsApplicationException(ErrorCode.POST_NOT_FOUND,"post($postId) is not founded")
+        val post: Post = getPostbyIdOrException(postId)
         // 포스트 작성자 == 수정하려는 사람
         if(post.user.userName != userName) {
             throw SnsApplicationException(ErrorCode.INVALID_PERMISSION,"$userName has no permission with post($postId)")
@@ -50,9 +48,9 @@ class PostServiceImpl(
         return postRepository.save(post)
     }
 
-    override fun delete(postId: Long, userName: String?): Long {
+    override fun delete(postId: Long, userName: String): Long {
         // 포스트존재여부
-        val post: Post = postRepository.findById(postId)?: throw SnsApplicationException(ErrorCode.POST_NOT_FOUND,"post($postId) is not founded")
+        val post: Post = getPostbyIdOrException(postId)
         // 포스트 작성자 == 수정하려는 사람
         if(post.user.userName != userName) {
             throw SnsApplicationException(ErrorCode.INVALID_PERMISSION,"$userName has no permission with post($postId)")
@@ -69,17 +67,14 @@ class PostServiceImpl(
     }
 
     override fun my(pageable: Pageable, userName: String): Page<PostResponse> {
-        val user: User = userRepository.findByUserName(userName)?: throw SnsApplicationException(ErrorCode.USER_NOT_FOUND, "$userName is not founded")
+        val user: User = getUserByUserNameOrException(userName)
         return postRepository.findAllByUser(pageable, user).map{PostResponse(it)}
     }
 
     @Transactional
-    override fun like(postId: Long, userName: String?): Long {
-        if(userName == null) {
-            throw SnsApplicationException(ErrorCode.INVALID_PERMISSION, "userName is null")
-        }
-        val post:Post = postRepository.findById(postId) ?: throw SnsApplicationException(ErrorCode.POST_NOT_FOUND,"post($postId) is not founded")
-        val user:User = userRepository.findByUserName(userName) ?: throw SnsApplicationException(ErrorCode.USER_NOT_FOUND, "$userName is not founded")
+    override fun like(postId: Long, userName: String): Long {
+        val post: Post = getPostbyIdOrException(postId)
+        val user: User = getUserByUserNameOrException(userName)
 
         val postLike : PostLike? = postLikeRepository.findByUserAndPost(user,post)
         if(postLike != null) {
@@ -93,19 +88,15 @@ class PostServiceImpl(
         return result.id!!
     }
 
-    override fun likeCount(postId: Long): Long {
-        val post: Post = postRepository.findById(postId) ?: throw SnsApplicationException(ErrorCode.POST_NOT_FOUND,"post($postId) is not founded")
 
+    override fun likeCount(postId: Long): Long {
+        val post: Post = getPostbyIdOrException(postId)
         return postLikeRepository.countByPost(post)
     }
 
-    override fun comment(postId: Long, userName: String?, comment: String): Long {
-        if(userName == null) {
-            throw SnsApplicationException(ErrorCode.INVALID_PERMISSION, "userName is null")
-        }
-        val post:Post = postRepository.findById(postId) ?: throw SnsApplicationException(ErrorCode.POST_NOT_FOUND,"post($postId) is not founded")
-        val user:User = userRepository.findByUserName(userName) ?: throw SnsApplicationException(ErrorCode.USER_NOT_FOUND, "$userName is not founded")
-
+    override fun comment(postId: Long, userName: String, comment: String): Long {
+        val post: Post = getPostbyIdOrException(postId)
+        val user: User = getUserByUserNameOrException(userName)
 
         val alarm = Alarm(user,AlarmType.NEW_COMMENT_ON_POST, AlarmArgs(user.id!!, post.user.id!!, post.id!!))
         alarmRepository.save(alarm)
@@ -116,5 +107,24 @@ class PostServiceImpl(
     override fun getComments(postId: Long, pageable: Pageable): Page<CommentResponse> {
         val post:Post = postRepository.findById(postId) ?: throw SnsApplicationException(ErrorCode.POST_NOT_FOUND,"post($postId) is not founded")
         return commentRepository.findAllByPost(post, pageable).map { CommentResponse(it) };
+    }
+
+
+
+
+    private fun getPostbyIdOrException(postId: Long): Post {
+        val post: Post = postRepository.findById(postId) ?: throw SnsApplicationException(
+            ErrorCode.POST_NOT_FOUND,
+            "post($postId) is not founded"
+        )
+        return post
+    }
+
+    private fun getUserByUserNameOrException(userName: String): User {
+        val user: User = userRepository.findByUserName(userName) ?: throw SnsApplicationException(
+            ErrorCode.USER_NOT_FOUND,
+            "$userName is not founded"
+        )
+        return user
     }
 }

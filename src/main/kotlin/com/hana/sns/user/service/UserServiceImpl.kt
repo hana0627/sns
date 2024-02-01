@@ -44,7 +44,7 @@ class UserServiceImpl (
     }
     override fun login(userName: String, password: String): String {
         // 회원가입 여부 체크
-        val user: User = userRepository.findByUserName(userName)?:throw SnsApplicationException(ErrorCode.USER_NOT_FOUND,"$userName is not founded")
+        val user: User = getUserByUserNameOrException(userName)
 
         // 비밀번호 체크
         if(!passwordEncoder.matches(password, user.password)) {
@@ -57,11 +57,19 @@ class UserServiceImpl (
     }
 
     override fun loadUserByUserName(userName: String): User {
-        return userRepository.findByUserName(userName)?: throw SnsApplicationException(ErrorCode.USER_NOT_FOUND,"$userName is not founded")
+        return getUserByUserNameOrException(userName)
     }
 
+
     override fun getAlarms(userName: String, pageable: Pageable): Page<AlarmResponse> {
-        val user: User = userRepository.findByUserName(userName) ?: throw SnsApplicationException(ErrorCode.USER_NOT_FOUND,"$userName is not founded")
+        val user: User = getUserByUserNameOrException(userName)
         return alarmRepository.findAllByUser(user, pageable).map { AlarmResponse(it) }
     }
+
+
+    private fun getUserByUserNameOrException(userName: String) =
+        userRepository.findByUserName(userName) ?: throw SnsApplicationException(
+            ErrorCode.USER_NOT_FOUND,
+            "$userName is not founded"
+    )
 }

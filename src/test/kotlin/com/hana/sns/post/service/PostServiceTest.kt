@@ -315,9 +315,7 @@ class PostServiceTest {
         postRepository.save(post)
 
         //when & then
-        val error = assertThrows<SnsApplicationException> { postService.like(post.id!!, null) }
-        assertThat(error.errorCode).isEqualTo(ErrorCode.INVALID_PERMISSION)
-        assertThat(error.message).isEqualTo("userName is null")
+        val error = assertThrows<NullPointerException> { postService.like(post.id!!, null!!) }
     }
 
     @Test
@@ -411,9 +409,7 @@ class PostServiceTest {
         val comment = "comment"
 
         //when & then
-        val error = assertThrows<SnsApplicationException> { postService.comment(post.id!!, null, comment) }
-        assertThat(error.errorCode).isEqualTo(ErrorCode.INVALID_PERMISSION)
-        assertThat(error.message).isEqualTo("userName is null")
+        val error = assertThrows<NullPointerException> { postService.comment(post.id!!, null!!, comment) }
     }
 
     @Test

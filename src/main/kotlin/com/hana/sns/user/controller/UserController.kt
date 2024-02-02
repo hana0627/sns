@@ -38,6 +38,8 @@ class UserController (
 
     @GetMapping("/api/v1/users/alarm")
     fun alarm(pageable: Pageable, authentication: Authentication): Response<Page<AlarmResponse>>{
-        return Response.success(userService.getAlarms(authentication.name, pageable))
+//        return Response.success(userService.getAlarms(authentication.name, pageable))
+        val user: User = authentication.principal as User
+        return Response.success(userService.getAlarms(user, pageable))
     }
 }

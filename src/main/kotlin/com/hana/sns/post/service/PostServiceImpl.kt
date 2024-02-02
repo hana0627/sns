@@ -31,29 +31,28 @@ class PostServiceImpl(
     private val alarmRepository: AlarmRepository,
 ) : PostService {
     @Transactional
-    override fun create(title: String, body: String, userName: String): Long{
-        val user: User = getUserByUserNameOrException(userName)
+    override fun create(title: String, body: String, user: User): Long{
         val post = Post(title, body, user)
         return postRepository.save(post).id!!
     }
 
-    override fun modify(postId: Long, title: String, body: String, userName: String): Post {
+    override fun modify(postId: Long, title: String, body: String, user: User): Post {
         // 포스트존재여부
         val post: Post = getPostbyIdOrException(postId)
         // 포스트 작성자 == 수정하려는 사람
-        if(post.user.userName != userName) {
-            throw SnsApplicationException(ErrorCode.INVALID_PERMISSION,"$userName has no permission with post($postId)")
+        if(post.user != user) {
+            throw SnsApplicationException(ErrorCode.INVALID_PERMISSION,"${user.userName} has no permission with post($postId)")
         }
         post.update(title, body)
         return postRepository.save(post)
     }
 
-    override fun delete(postId: Long, userName: String): Long {
+    override fun delete(postId: Long, user: User): Long {
         // 포스트존재여부
         val post: Post = getPostbyIdOrException(postId)
         // 포스트 작성자 == 수정하려는 사람
-        if(post.user.userName != userName) {
-            throw SnsApplicationException(ErrorCode.INVALID_PERMISSION,"$userName has no permission with post($postId)")
+        if(post.user != user) {
+            throw SnsApplicationException(ErrorCode.INVALID_PERMISSION,"${user.userName} has no permission with post($postId)")
         }
         postLikeRepository.deleteAllByPost(post)
         commentRepository.deleteAllByPost(post)
@@ -66,19 +65,16 @@ class PostServiceImpl(
         return postRepository.findAll(pageable).map{PostResponse(it)}
     }
 
-    override fun my(pageable: Pageable, userName: String): Page<PostResponse> {
-        val user: User = getUserByUserNameOrException(userName)
+    override fun my(pageable: Pageable, user: User): Page<PostResponse> {
         return postRepository.findAllByUser(pageable, user).map{PostResponse(it)}
     }
 
     @Transactional
-    override fun like(postId: Long, userName: String): Long {
+    override fun like(postId: Long, user: User): Long {
         val post: Post = getPostbyIdOrException(postId)
-        val user: User = getUserByUserNameOrException(userName)
-
         val postLike : PostLike? = postLikeRepository.findByUserAndPost(user,post)
         if(postLike != null) {
-            throw SnsApplicationException(ErrorCode.ALREADY_LIKED, "userName $userName already liked post $postId")
+            throw SnsApplicationException(ErrorCode.ALREADY_LIKED, "userName ${user.userName} already liked post $postId")
         }
 
         val alarm = Alarm(user,AlarmType.NEW_LIKE_ON_POST, AlarmArgs(user.id!!, post.user.id!!, post.id!!))
@@ -94,9 +90,8 @@ class PostServiceImpl(
         return postLikeRepository.countByPost(post)
     }
 
-    override fun comment(postId: Long, userName: String, comment: String): Long {
+    override fun comment(postId: Long, user: User, comment: String): Long {
         val post: Post = getPostbyIdOrException(postId)
-        val user: User = getUserByUserNameOrException(userName)
 
         val alarm = Alarm(user,AlarmType.NEW_COMMENT_ON_POST, AlarmArgs(user.id!!, post.user.id!!, post.id!!))
         alarmRepository.save(alarm)
@@ -120,11 +115,4 @@ class PostServiceImpl(
         return post
     }
 
-    private fun getUserByUserNameOrException(userName: String): User {
-        val user: User = userRepository.findByUserName(userName) ?: throw SnsApplicationException(
-            ErrorCode.USER_NOT_FOUND,
-            "$userName is not founded"
-        )
-        return user
-    }
 }

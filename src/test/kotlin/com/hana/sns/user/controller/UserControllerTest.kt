@@ -26,6 +26,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.security.authentication.TestingAuthenticationToken
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.security.test.context.support.WithAnonymousUser
 import org.springframework.test.util.ReflectionTestUtils
 
 class UserControllerTest(
@@ -157,7 +158,7 @@ class UserControllerTest(
 
 
         val pageable = PageRequest.of(0,10)
-        val authentication = TestingAuthenticationToken(user1.userName,user1.password, mutableListOf(SimpleGrantedAuthority(UserRole.USER.toString())))
+        val authentication = TestingAuthenticationToken(user1,user1.password, mutableListOf(SimpleGrantedAuthority(UserRole.USER.toString())))
 
         //when
         val result = userController.alarm(pageable,authentication)
@@ -173,6 +174,7 @@ class UserControllerTest(
     }
 
     @Test
+    @WithAnonymousUser
     fun 로그인하지_않은_유저가_알람요청시_예외를_발생한다() {
         //given
         val user1 = User.fixture("userName1", passwordEncoder.encode("password"))
@@ -191,10 +193,11 @@ class UserControllerTest(
         alarmRepository.save(Alarm.fixture(user1, AlarmType.NEW_COMMENT_ON_POST, AlarmArgs(savedUser3.id!!,savedUser1.id!!, savedPost.id!!)))
         alarmRepository.save(Alarm.fixture(user1, AlarmType.NEW_COMMENT_ON_POST, AlarmArgs(savedUser4.id!!,savedUser1.id!!, savedPost.id!!)))
 
+        val authentication = TestingAuthenticationToken(null, null, mutableListOf(SimpleGrantedAuthority(UserRole.USER.toString())))
 
         val pageable = PageRequest.of(0,10)
         //when & then
-        assertThrows<NullPointerException> {  userController.alarm(pageable,null!!) }
+        assertThrows<NullPointerException> {  userController.alarm(pageable,authentication) }
 
     }
 

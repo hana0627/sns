@@ -41,13 +41,12 @@ class PostServiceTest {
     fun 글작성이_성공하는_경우() {
         //given
         val user = User.fixture("userName",passwordEncoder.encode("password"))
-        userRepository.save(user)
 
         val title: String = "title"
         val body: String = "postBody"
 
         //when
-        postService.create(title, body, user.userName)
+        postService.create(title, body, user)
 
         //then
         val result = postRepository.findById(1)
@@ -56,19 +55,24 @@ class PostServiceTest {
         assertThat(result?.title).isEqualTo("title")
         assertThat(result?.body).isEqualTo("postBody")
     }
-    @Test
-    fun 글작성시_요청한_유저가_없는_경우() {
-        //given
-        val title: String = "title"
-        val body: String = "postBody"
-
-        //when & then
-        val errorCode = assertThrows<SnsApplicationException>{
-            postService.create(title, body, "emptyUser") }.errorCode
-
-        assertThat(errorCode).isEqualTo(ErrorCode.USER_NOT_FOUND)
-
-    }
+    
+    // Controller에서 Authentication 객체로 유저검증
+//    @Test
+//    fun 글작성시_요청한_유저가_없는_경우() {
+//        //given
+//        val title: String = "title"
+//        val body: String = "postBody"
+//
+//        val user = User.fixture("userName",passwordEncoder.encode("password"))
+//
+//
+//        //when & then
+//        val errorCode = assertThrows<SnsApplicationException>{
+//            postService.create(title, body, user) }.errorCode
+//
+//        assertThat(errorCode).isEqualTo(ErrorCode.USER_NOT_FOUND)
+//
+//    }
 
     @Test
     fun 글_수정이_성공하는_경우() {
@@ -83,14 +87,14 @@ class PostServiceTest {
         val modifyBody = "modifyBody"
 
         //when
-        postService.modify(savedPost.id!!,modifyTitle, modifyBody, savedUser.userName)
+        postService.modify(savedPost.id!!,modifyTitle, modifyBody, savedUser)
 
         //then
         val result: Post? = postRepository.findById(savedPost.id!!)
         assertThat(result?.title).isEqualTo("modifyTitle")
         assertThat(result?.body).isEqualTo("modifyBody")
     }
-
+//
     @Test
     fun 로그인하지_않은_유저가_글_수정을_하는_경우_예외를_발생한다() {
         //given
@@ -108,12 +112,13 @@ class PostServiceTest {
         // 인자에서 nullable하지 않게 받고있으므로 NPE처리
         assertThrows<NullPointerException> { postService.modify(savedPost.id!!,modifyTitle, modifyBody, null!!) }
 
-
     }
+
     @Test
     fun 글_수정시_본인이_작성한_글이_아니라면_예외를_발생한다() {
         //given
         val user = User.fixture("userName",passwordEncoder.encode("password"))
+        val wrongUser = User.fixture("userName1",passwordEncoder.encode("password"))
         val post = Post.fixture("title","body",user)
 
         val savedUser: User = userRepository.save(user)
@@ -123,11 +128,13 @@ class PostServiceTest {
         val modifyBody = "modifyBody"
 
         //when & then
-        val errorCode = assertThrows<SnsApplicationException> { postService.modify(savedPost.id!!,modifyTitle, modifyBody, "wrongUserName") }.errorCode
+        val error = assertThrows<SnsApplicationException> { postService.modify(savedPost.id!!,modifyTitle, modifyBody, wrongUser) }
 
-        assertThat(errorCode).isEqualTo(ErrorCode.INVALID_PERMISSION)
+        assertThat(error.errorCode).isEqualTo(ErrorCode.INVALID_PERMISSION)
+        assertThat(error.message).isEqualTo("userName1 has no permission with post(1)")
 
     }
+
     @Test
     fun 글_수정시_수정하려는_글이_없는경우_예외를_발생한다() {
         //given
@@ -141,9 +148,10 @@ class PostServiceTest {
         val modifyBody = "modifyBody"
 
         //when & then
-        val errorCode = assertThrows<SnsApplicationException> { postService.modify(99999,modifyTitle, modifyBody, savedUser.userName) }.errorCode
+        val error = assertThrows<SnsApplicationException> { postService.modify(99999,modifyTitle, modifyBody, savedUser) }
 
-        assertThat(errorCode).isEqualTo(ErrorCode.POST_NOT_FOUND)
+        assertThat(error.errorCode).isEqualTo(ErrorCode.POST_NOT_FOUND)
+        assertThat(error.message).isEqualTo("post(99999) is not founded")
 
     }
 
@@ -169,7 +177,7 @@ class PostServiceTest {
         // assertThat(beforeLikes.size).isEqualTo(2)
 
         //when
-        postService.delete(savedPost.id!!, savedUser.userName)
+        postService.delete(savedPost.id!!, savedUser)
 
         //then
         val result = postRepository.findAll().size
@@ -182,35 +190,39 @@ class PostServiceTest {
         assertThat(result).isEqualTo(0)
     }
 
-    @Test
-    fun 로그인하지_않은_유저가_글_삭제를_하는_경우_예외를_발생한다() {
-        //given
-        val user = User.fixture("userName",passwordEncoder.encode("password"))
-        val post = Post.fixture("title","body",user)
-
-        val savedUser: User = userRepository.save(user)
-        val savedPost: Post = postRepository.save(post)
-
-        //when & then
-        assertThrows<NullPointerException> { postService.delete(savedPost.id!!, null!!) }
-
-    }
+    // Controller에서 Authentication 객체로 유저검증
+//    @Test
+//    fun 로그인하지_않은_유저가_글_삭제를_하는_경우_예외를_발생한다() {
+//        //given
+//        val user = User.fixture("userName",passwordEncoder.encode("password"))
+//        val post = Post.fixture("title","body",user)
+//
+//        val savedUser: User = userRepository.save(user)
+//        val savedPost: Post = postRepository.save(post)
+//
+//        //when & then
+//        assertThrows<NullPointerException> { postService.delete(savedPost.id!!, null!!) }
+//
+//    }
 
     @Test
     fun 글_삭제시_본인이_작성한_글이_아니라면_예외를_발생한다() {
         //given
         val user = User.fixture("userName",passwordEncoder.encode("password"))
+        val wrongUser = User.fixture("userName1",passwordEncoder.encode("password"))
         val post = Post.fixture("title","body",user)
 
         val savedUser: User = userRepository.save(user)
         val savedPost: Post = postRepository.save(post)
 
         //when & then
-        val errorCode = assertThrows<SnsApplicationException> { postService.delete(savedPost.id!!,"wrongUserName") }.errorCode
+        val error = assertThrows<SnsApplicationException> { postService.delete(savedPost.id!!,wrongUser) }
 
-        assertThat(errorCode).isEqualTo(ErrorCode.INVALID_PERMISSION)
+        assertThat(error.errorCode).isEqualTo(ErrorCode.INVALID_PERMISSION)
+        assertThat(error.message).isEqualTo("userName1 has no permission with post(1)")
 
     }
+
     @Test
     fun 글_삭제시_삭제하려는_글이_없는경우_예외를_발생한다() {
         //given
@@ -221,9 +233,10 @@ class PostServiceTest {
         val savedPost: Post = postRepository.save(post)
 
         //when & then
-        val errorCode = assertThrows<SnsApplicationException> { postService.delete(99999, savedUser.userName) }.errorCode
+        val error = assertThrows<SnsApplicationException> { postService.delete(99999, user) }
 
-        assertThat(errorCode).isEqualTo(ErrorCode.POST_NOT_FOUND)
+        assertThat(error.errorCode).isEqualTo(ErrorCode.POST_NOT_FOUND)
+        assertThat(error.message).isEqualTo("post(99999) is not founded")
 
     }
 
@@ -274,7 +287,7 @@ class PostServiceTest {
         val pageable = PageRequest.of(0,10)
 
         //when
-        val result = postService.my(pageable, user1.userName).get().toList()
+        val result = postService.my(pageable, user1).get().toList()
 
         //then
         assertThat(result.size).isEqualTo(10)
@@ -297,7 +310,7 @@ class PostServiceTest {
         val savedPost: Post = postRepository.save(post)
 
         //when
-        val id = postService.like(post.id!!, user2.userName)
+        val id = postService.like(post.id!!, user2)
 
         //then
         val result = postLikeRepository.findById(id)
@@ -306,17 +319,18 @@ class PostServiceTest {
         assertThat(alarm.size).isEqualTo(1)
     }
 
-    @Test
-    fun 좋아요기능시_유저가_로그인하지_않은_경우_예외를_발생한다() {
-        //given
-        val user = User.fixture("userName",passwordEncoder.encode("password"))
-        val post = Post.fixture("title","body",user)
-
-        postRepository.save(post)
-
-        //when & then
-        val error = assertThrows<NullPointerException> { postService.like(post.id!!, null!!) }
-    }
+    // Controller에서 Authentication 객체로 유저검증
+//    @Test
+//    fun 좋아요기능시_유저가_로그인하지_않은_경우_예외를_발생한다() {
+//        //given
+//        val user = User.fixture("userName",passwordEncoder.encode("password"))
+//        val post = Post.fixture("title","body",user)
+//
+//        postRepository.save(post)
+//
+//        //when & then
+//        val error = assertThrows<NullPointerException> { postService.like(post.id!!, null!!) }
+//    }
 
     @Test
     fun 존재하지_않는_글에대해서_좋아요_요청시_예외를_발생한다() {
@@ -328,7 +342,7 @@ class PostServiceTest {
         val savedPost: Post = postRepository.save(post)
 
         //when & then
-        val error = assertThrows<SnsApplicationException> { postService.like(999999, savedUser.userName) }
+        val error = assertThrows<SnsApplicationException> { postService.like(999999, savedUser) }
         assertThat(error.errorCode).isEqualTo(ErrorCode.POST_NOT_FOUND)
         assertThat(error.message).isEqualTo("post(999999) is not founded")
 
@@ -346,7 +360,7 @@ class PostServiceTest {
         postLikeRepository.save(PostLike(savedUser, savedPost))
 
         //when & then
-        val error = assertThrows<SnsApplicationException> { postService.like(post.id!!, user.userName) }
+        val error = assertThrows<SnsApplicationException> { postService.like(post.id!!, savedUser) }
 
         assertThat(error.errorCode).isEqualTo(ErrorCode.ALREADY_LIKED)
         assertThat(error.message).isEqualTo("userName userName already liked post 1")
@@ -385,11 +399,11 @@ class PostServiceTest {
 
         val savedUser: User = userRepository.save(user)
         val savedPost: Post = postRepository.save(post)
-        
+
         val comment = "comment"
 
         //when
-        val result: Long = postService.comment(savedPost.id!!, savedUser.userName, comment)
+        val result: Long = postService.comment(savedPost.id!!, savedUser, comment)
         val savedEntity = commentRepository.findById(result)
         //then
         assertThat(savedEntity).isNotNull
@@ -423,7 +437,7 @@ class PostServiceTest {
         val comment = "comment"
 
         //when & then
-        val error = assertThrows<SnsApplicationException> { postService.comment(999999, savedUser.userName, comment) }
+        val error = assertThrows<SnsApplicationException> { postService.comment(999999, savedUser, comment) }
         assertThat(error.errorCode).isEqualTo(ErrorCode.POST_NOT_FOUND)
         assertThat(error.message).isEqualTo("post(999999) is not founded")
 
@@ -471,6 +485,6 @@ class PostServiceTest {
         assertThat(error.errorCode).isEqualTo(ErrorCode.POST_NOT_FOUND)
         assertThat(error.message).isEqualTo("post(999999) is not founded")
     }
-    
+
 
 }

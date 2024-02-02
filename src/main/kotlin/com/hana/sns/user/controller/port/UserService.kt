@@ -9,6 +9,6 @@ interface UserService {
     fun join(userName: String, password: String): User
     fun login(userName: String, password: String): String
     fun loadUserByUserName(userName: String): User
-    fun getAlarms(userName: String, pageable: Pageable): Page<AlarmResponse>
+    fun getAlarms(user: User, pageable: Pageable): Page<AlarmResponse>
 
 }

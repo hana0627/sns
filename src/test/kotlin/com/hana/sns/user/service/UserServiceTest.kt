@@ -140,7 +140,7 @@ class UserServiceTest() {
 
         val pageable = PageRequest.of(0,10)
         //when
-        val result = userService.getAlarms(user1.userName,pageable).toList()
+        val result = userService.getAlarms(user1,pageable).toList()
 
         //then
         assertThat(result.size).isEqualTo(3)
@@ -150,26 +150,27 @@ class UserServiceTest() {
         assertThat(result[0].args.targetPostId).isEqualTo(savedPost.id)
     }
 
-    @Test
-    fun 유효하지_않은_유저가_알람을_요청할_시_예외발생() {
-        //given
-        val user1 = User.fixture("userName1", passwordEncoder.encode("password"))
-        val user2 = User.fixture("userName2", passwordEncoder.encode("password"))
-        val savedUser1 = userRepository.save(user1)
-        val savedUser2 = userRepository.save(user2)
-
-        val postRepository = FakePostRepository()
-        val post = Post.fixture("title","body",user1)
-        val savedPost = postRepository.save(post)
-
-        alarmRepository.save(Alarm.fixture(user1,AlarmType.NEW_COMMENT_ON_POST, AlarmArgs(savedUser2.id!!,savedUser1.id!!, savedPost.id!!)))
-
-        val pageable = PageRequest.of(0,10)
-        //when & then
-        val result = assertThrows<SnsApplicationException> { userService.getAlarms("invalidUser",pageable) }
-
-        assertThat(result.errorCode).isEqualTo(ErrorCode.USER_NOT_FOUND)
-        assertThat(result.message).isEqualTo("invalidUser is not founded")
-    }
+    // Controller Authentication에서 검증
+//    @Test
+//    fun 유효하지_않은_유저가_알람을_요청할_시_예외발생() {
+//        //given
+//        val user1 = User.fixture("userName1", passwordEncoder.encode("password"))
+//        val user2 = User.fixture("userName2", passwordEncoder.encode("password"))
+//        val savedUser1 = userRepository.save(user1)
+//        val savedUser2 = userRepository.save(user2)
+//
+//        val postRepository = FakePostRepository()
+//        val post = Post.fixture("title","body",user1)
+//        val savedPost = postRepository.save(post)
+//
+//        alarmRepository.save(Alarm.fixture(user1,AlarmType.NEW_COMMENT_ON_POST, AlarmArgs(savedUser2.id!!,savedUser1.id!!, savedPost.id!!)))
+//
+//        val pageable = PageRequest.of(0,10)
+//        //when & then
+//        val result = assertThrows<SnsApplicationException> { userService.getAlarms(user2,pageable) }
+//
+//        assertThat(result.errorCode).isEqualTo(ErrorCode.USER_NOT_FOUND)
+//        assertThat(result.message).isEqualTo("invalidUser is not founded")
+//    }
 }
 

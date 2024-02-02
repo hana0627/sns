@@ -7,6 +7,7 @@ import com.hana.sns.post.controller.request.PostCreateRequest
 import com.hana.sns.post.controller.request.PostModifyRequest
 import com.hana.sns.post.controller.response.CommentResponse
 import com.hana.sns.post.controller.response.PostResponse
+import com.hana.sns.user.domain.User
 import lombok.RequiredArgsConstructor
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -28,17 +29,20 @@ class PostController(
 
     @PostMapping("/api/v1/posts")
     fun create(@RequestBody request: PostCreateRequest, authentication: Authentication): Response<Any> {
-        return Response.success(postService.create(request.title, request.body, authentication.name));
+        val user: User = authentication.principal as User
+        return Response.success(postService.create(request.title, request.body, user));
     }
     @PutMapping("/api/v1/posts/{postId}")
     fun modify(@PathVariable postId: Long, @RequestBody request: PostModifyRequest, authentication: Authentication): Response<PostResponse> {
-        val result = PostResponse(postService.modify(postId, request.title, request.body, authentication.name))
+        val user: User = authentication.principal as User
+        val result = PostResponse(postService.modify(postId, request.title, request.body, user))
         return Response.success(result)
     }
 
     @DeleteMapping("/api/v1/posts/{postId}")
     fun delete (@PathVariable postId: Long, authentication: Authentication): Response<Any> {
-        return Response.success(postService.delete(postId, authentication.name));
+        val user: User = authentication.principal as User
+        return Response.success(postService.delete(postId, user));
     }
 
     @GetMapping("/api/v1/posts")
@@ -47,12 +51,14 @@ class PostController(
     }
     @GetMapping("/api/v1/posts/my")
     fun my(pageable: Pageable, authentication: Authentication) : Response<Page<PostResponse>>{
-        return Response.success(postService.my(pageable, authentication.name))
+        val user: User = authentication.principal as User
+        return Response.success(postService.my(pageable, user))
     }
 
     @PostMapping("/api/v1/posts/{postId}/likes")
     fun like(@PathVariable postId: Long, authentication: Authentication): Response<Any>  {
-        return Response.success(postService.like(postId, authentication.name))
+        val user: User = authentication.principal as User
+        return Response.success(postService.like(postId, user))
     }
 
     @GetMapping("/api/v1/posts/{postId}/likes")
@@ -62,7 +68,8 @@ class PostController(
 
     @PostMapping("/api/v1/posts/{postId}/comments")
     fun comment(@PathVariable postId: Long, @RequestBody request: CommentCreateRequest, authentication: Authentication):Response<Any> {
-        return Response.success(postService.comment(postId, authentication.name, request.comment));
+        val user: User = authentication.principal as User
+        return Response.success(postService.comment(postId, user, request.comment));
     }
     @GetMapping("/api/v1/posts/{postId}/comments")
     fun comments(@PathVariable postId: Long, pageable: Pageable):Response<Page<CommentResponse>> {

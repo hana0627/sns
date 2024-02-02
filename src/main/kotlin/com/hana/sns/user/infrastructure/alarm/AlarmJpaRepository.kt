@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 
 interface AlarmJpaRepository : JpaRepository<AlarmEntity, Long> {
-    fun findAllByUser(user: UserEntity, pageable: Pageable) : Page<AlarmEntity>
+    //fun findAllByUser(user: UserEntity, pageable: Pageable) : Page<AlarmEntity>
+    fun findAllByUserId(userId: Long, pageable: Pageable) : Page<AlarmEntity>
     fun save(alarmEntity: AlarmEntity): AlarmEntity
 }

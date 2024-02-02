@@ -25,6 +25,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.security.authentication.TestingAuthenticationToken
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.security.test.context.support.WithAnonymousUser
 
 class PostControllerTest {
     lateinit var testContainer: TestContainer
@@ -48,10 +49,10 @@ class PostControllerTest {
     @Test
     fun 글작성_성공 () {
         //given
-        userRepository.save(User("userName",passwordEncoder.encode("password")))
+        val user = userRepository.save(User("userName",passwordEncoder.encode("password")))
 
         val postCreateRequest = PostCreateRequest("title", "body")
-        val authentication = TestingAuthenticationToken("userName","password", mutableListOf(SimpleGrantedAuthority(UserRole.USER.toString())))
+        val authentication = TestingAuthenticationToken(user,user.password, mutableListOf(SimpleGrantedAuthority(UserRole.USER.toString())))
 
         //when
         val result = testContainer.postController.create(postCreateRequest, authentication)
@@ -62,18 +63,16 @@ class PostControllerTest {
     }
 
     @Test
-    fun 글작성시_없는userName이라면_예외발생 () {
+    fun 글작성시_유효하지_않는_유저라면_예외발생 () {
         //given
-        userRepository.save(User("userName",passwordEncoder.encode("password")))
+        val user = userRepository.save(User("userName",passwordEncoder.encode("password")))
+        val wrongUser = User.fixture("wrongUserName",passwordEncoder.encode("password"))
 
         val postCreateRequest = PostCreateRequest("title", "body")
-        val authentication = TestingAuthenticationToken("wrongUserName","password", mutableListOf(SimpleGrantedAuthority(UserRole.USER.toString())))
+        val authentication = TestingAuthenticationToken(null, null, mutableListOf(SimpleGrantedAuthority(UserRole.USER.toString())))
 
-        //when
-        val result = assertThrows<SnsApplicationException> { testContainer.postController.create(postCreateRequest, authentication) }.errorCode
-
-        //then
-        assertThat(result).isEqualTo(ErrorCode.USER_NOT_FOUND)
+        //when & then
+        val result = assertThrows<NullPointerException> { testContainer.postController.create(postCreateRequest, authentication) }
 
     }
 
@@ -90,7 +89,7 @@ class PostControllerTest {
         val modifyBody = "modifyBody"
         val postModifyRequest = PostModifyRequest(modifyTitle, modifyBody)
 
-        val authentication = TestingAuthenticationToken("userName","password", mutableListOf(SimpleGrantedAuthority(UserRole.USER.toString())))
+        val authentication = TestingAuthenticationToken(user, user.password, mutableListOf(SimpleGrantedAuthority(UserRole.USER.toString())))
         //when
         val result: Response<PostResponse> = postController.modify(savedPost.id!!, postModifyRequest , authentication)
 
@@ -102,6 +101,7 @@ class PostControllerTest {
     }
 
     @Test
+    @WithAnonymousUser
     fun 로그인하지_않은_유저가_글_수정을_하는_경우_예외를_발생한다() {
         //given
         val user = User.fixture("userName",passwordEncoder.encode("password"))
@@ -114,13 +114,16 @@ class PostControllerTest {
         val modifyBody = "modifyBody"
         val postModifyRequest = PostModifyRequest(modifyTitle, modifyBody)
 
+        val authentication = TestingAuthenticationToken(null, null, mutableListOf(SimpleGrantedAuthority(UserRole.USER.toString())))
+
         //when & then
-        assertThrows<NullPointerException>  { postController.modify(savedPost.id!!, postModifyRequest , null!!) }
+        assertThrows<NullPointerException>  { postController.modify(savedPost.id!!, postModifyRequest , authentication) }
     }
     @Test
     fun 글_수정시_본인이_작성한_글이_아니라면_예외를_발생한다() {
         //given
         val user = User.fixture("userName",passwordEncoder.encode("password"))
+        val wrongUser = User.fixture("wrongUserName",passwordEncoder.encode("password"))
         val post = Post.fixture("title","body",user)
 
         val savedUser: User = userRepository.save(user)
@@ -130,7 +133,7 @@ class PostControllerTest {
         val modifyBody = "modifyBody"
         val postModifyRequest = PostModifyRequest(modifyTitle, modifyBody)
 
-        val authentication = TestingAuthenticationToken("wrongUserName","password", mutableListOf(SimpleGrantedAuthority(UserRole.USER.toString())))
+        val authentication = TestingAuthenticationToken(wrongUser, wrongUser.password, mutableListOf(SimpleGrantedAuthority(UserRole.USER.toString())))
         //when
         val errorCode = assertThrows<SnsApplicationException> {
             postController.modify(savedPost.id!!, postModifyRequest , authentication)
@@ -152,7 +155,7 @@ class PostControllerTest {
         val modifyBody = "modifyBody"
         val postModifyRequest = PostModifyRequest(modifyTitle, modifyBody)
 
-        val authentication = TestingAuthenticationToken("userName","password", mutableListOf(SimpleGrantedAuthority(UserRole.USER.toString())))
+        val authentication = TestingAuthenticationToken(user, user.password, mutableListOf(SimpleGrantedAuthority(UserRole.USER.toString())))
         //when
         val errorCode = assertThrows<SnsApplicationException> {
             postController.modify(9999, postModifyRequest , authentication)
@@ -173,7 +176,7 @@ class PostControllerTest {
         val savedUser: User = userRepository.save(user)
         val savedPost: Post = postRepository.save(post)
 
-        val authentication = TestingAuthenticationToken("userName","password", mutableListOf(SimpleGrantedAuthority(UserRole.USER.toString())))
+        val authentication = TestingAuthenticationToken(user,user.password, mutableListOf(SimpleGrantedAuthority(UserRole.USER.toString())))
         //when
         val result = postController.delete(savedPost.id!!, authentication)
 
@@ -185,6 +188,7 @@ class PostControllerTest {
     }
 
     @Test
+    @WithAnonymousUser
     fun 로그인하지_않은_유저가_글_삭제를_하는_경우_예외를_발생한다() {
         //given
         val user = User.fixture("userName",passwordEncoder.encode("password"))
@@ -192,20 +196,23 @@ class PostControllerTest {
 
         val savedUser: User = userRepository.save(user)
         val savedPost: Post = postRepository.save(post)
+        val authentication = TestingAuthenticationToken(null ,null, mutableListOf(SimpleGrantedAuthority(UserRole.USER.toString())))
+
 
         //when & then
-        assertThrows<NullPointerException>  { postController.delete(savedPost.id!!, null!!) }
+        assertThrows<NullPointerException>  { postController.delete(savedPost.id!!, authentication) }
     }
     @Test
     fun 글_삭제시_본인이_작성한_글이_아니라면_예외를_발생한다() {
         //given
         val user = User.fixture("userName",passwordEncoder.encode("password"))
+        val wrongUser = User.fixture("wrongUserName",passwordEncoder.encode("password"))
         val post = Post.fixture("title","body",user)
 
         val savedUser: User = userRepository.save(user)
         val savedPost: Post = postRepository.save(post)
 
-        val authentication = TestingAuthenticationToken("wrongUserName","password", mutableListOf(SimpleGrantedAuthority(UserRole.USER.toString())))
+        val authentication = TestingAuthenticationToken(wrongUser, wrongUser.password, mutableListOf(SimpleGrantedAuthority(UserRole.USER.toString())))
         //when
         val errorCode = assertThrows<SnsApplicationException> {
             postController.delete(savedPost.id!! , authentication)
@@ -223,7 +230,7 @@ class PostControllerTest {
         val savedUser: User = userRepository.save(user)
         val savedPost: Post = postRepository.save(post)
 
-        val authentication = TestingAuthenticationToken("userName","password", mutableListOf(SimpleGrantedAuthority(UserRole.USER.toString())))
+        val authentication = TestingAuthenticationToken(user, user.password, mutableListOf(SimpleGrantedAuthority(UserRole.USER.toString())))
         //when
         val errorCode = assertThrows<SnsApplicationException> {
             postController.delete(9999 , authentication)
@@ -282,7 +289,7 @@ class PostControllerTest {
         }
 
         val pageable = PageRequest.of(0,10)
-        val authentication = TestingAuthenticationToken(user1.userName,user1.password, mutableListOf(SimpleGrantedAuthority(UserRole.USER.toString())))
+        val authentication = TestingAuthenticationToken(user1, user1.password, mutableListOf(SimpleGrantedAuthority(UserRole.USER.toString())))
         //when
         val result = postController.my(pageable, authentication)
         val resultBody = result.result.get().toList()
@@ -304,7 +311,7 @@ class PostControllerTest {
         val savedUser: User = userRepository.save(user)
         val savedPost: Post = postRepository.save(post)
 
-        val authentication = TestingAuthenticationToken(user.userName,user.password, mutableListOf(SimpleGrantedAuthority(UserRole.USER.toString())))
+        val authentication = TestingAuthenticationToken(user, user.password, mutableListOf(SimpleGrantedAuthority(UserRole.USER.toString())))
 
         //when
         val result = postController.like(savedPost.id!!, authentication)
@@ -316,16 +323,17 @@ class PostControllerTest {
 
 
     @Test
+    @WithAnonymousUser
     fun 좋아요기능시_유저가_로그인하지_않은_경우_예외를_발생한다() {
         //given
         val user = User.fixture("userName",passwordEncoder.encode("password"))
         val post = Post.fixture("title","body",user)
 
         val savedPost: Post = postRepository.save(post)
-
+        val authentication = TestingAuthenticationToken(null ,null, mutableListOf(SimpleGrantedAuthority(UserRole.USER.toString())))
 
         //when & then
-        val result = assertThrows<NullPointerException> { postController.like(savedPost.id!!, null!!) }
+        val result = assertThrows<NullPointerException> { postController.like(savedPost.id!!, authentication) }
     }
 
 
@@ -336,7 +344,7 @@ class PostControllerTest {
 
         val savedUser: User = userRepository.save(user)
 
-        val authentication = TestingAuthenticationToken(user.userName,user.password, mutableListOf(SimpleGrantedAuthority(UserRole.USER.toString())))
+        val authentication = TestingAuthenticationToken(user, user.password, mutableListOf(SimpleGrantedAuthority(UserRole.USER.toString())))
 
         //when & then
         val result = assertThrows<SnsApplicationException> { postController.like(999999, authentication) }
@@ -356,7 +364,7 @@ class PostControllerTest {
 
         postLikeRepository.save(PostLike(savedUser, savedPost))
 
-        val authentication = TestingAuthenticationToken(user.userName,user.password, mutableListOf(SimpleGrantedAuthority(UserRole.USER.toString())))
+        val authentication = TestingAuthenticationToken(user, user.password, mutableListOf(SimpleGrantedAuthority(UserRole.USER.toString())))
 
         //when & then
         val error = assertThrows<SnsApplicationException> { postController.like(savedPost.id!!, authentication) }
@@ -402,7 +410,7 @@ class PostControllerTest {
         val savedPost: Post = postRepository.save(post)
 
         val request = CommentCreateRequest("comment");
-        val authentication = TestingAuthenticationToken(user.userName,user.password, mutableListOf(SimpleGrantedAuthority(UserRole.USER.toString())))
+        val authentication = TestingAuthenticationToken(user, user.password, mutableListOf(SimpleGrantedAuthority(UserRole.USER.toString())))
 
         //when
         val success = postController.comment(savedPost.id!!, request, authentication)
@@ -421,6 +429,7 @@ class PostControllerTest {
     }
 
     @Test
+    @WithAnonymousUser
     fun 댓글_작성시_유저가_로그인하지_않은_경우_예외를_발생한다() {
         //given
         val user = User.fixture("userName",passwordEncoder.encode("password"))
@@ -428,9 +437,10 @@ class PostControllerTest {
 
         postRepository.save(post)
         val request = CommentCreateRequest("comment");
+        val authentication = TestingAuthenticationToken(null ,null, mutableListOf(SimpleGrantedAuthority(UserRole.USER.toString())))
 
         //when & then
-        val error = assertThrows<NullPointerException> { postController.comment(post.id!!, request, null!!) }
+        val error = assertThrows<NullPointerException> { postController.comment(post.id!!, request, authentication) }
     }
 
     @Test
@@ -442,7 +452,7 @@ class PostControllerTest {
         val savedUser: User = userRepository.save(user)
         val savedPost: Post = postRepository.save(post)
         val request = CommentCreateRequest("comment");
-        val authentication = TestingAuthenticationToken(user.userName,user.password, mutableListOf(SimpleGrantedAuthority(UserRole.USER.toString())))
+        val authentication = TestingAuthenticationToken(user, user.password, mutableListOf(SimpleGrantedAuthority(UserRole.USER.toString())))
 
         //when & then
         val error = assertThrows<SnsApplicationException> { postController.comment(999999, request, authentication) }

@@ -15,8 +15,12 @@ class AlarmRepositoryImpl(
     private val alarmJpaRepository: AlarmJpaRepository,
 ) : AlarmRepository {
 
-    override fun findAllByUser(user: User, pageable: Pageable): Page<Alarm> {
-        return alarmJpaRepository.findAllByUser(UserEntity(user) ,pageable).map{ Alarm(it) }
+//    override fun findAllByUser(user: User, pageable: Pageable): Page<Alarm> {
+//        return alarmJpaRepository.findAllByUser(UserEntity(user) ,pageable).map{ Alarm(it) }
+//    }
+
+    override fun findAllByUserId(userId: Long, pageable: Pageable): Page<Alarm> {
+        return alarmJpaRepository.findAllByUserId(userId ,pageable).map{ Alarm(it) }
     }
 
     override fun save(alarm: Alarm): Alarm {

@@ -61,9 +61,8 @@ class UserServiceImpl (
     }
 
 
-    override fun getAlarms(userName: String, pageable: Pageable): Page<AlarmResponse> {
-        val user: User = getUserByUserNameOrException(userName)
-        return alarmRepository.findAllByUser(user, pageable).map { AlarmResponse(it) }
+    override fun getAlarms(user: User, pageable: Pageable): Page<AlarmResponse> {
+        return alarmRepository.findAllByUserId(user.id!!, pageable).map { AlarmResponse(it) }
     }
 
 

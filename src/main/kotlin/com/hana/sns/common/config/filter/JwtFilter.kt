@@ -30,7 +30,8 @@ class JwtFilter(
         val header: String? = request.getHeader(HttpHeaders.AUTHORIZATION)
         if(header == null || !header.startsWith("Bearer ")) {
             log.error("Error occurs while getting headers")
-            filterChain.doFilter(request,response)
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")
+//            filterChain.doFilter(request,response)
             return
         }
 
@@ -38,12 +39,14 @@ class JwtFilter(
             val token: String = header.split(" ")[1].trim()
             if(key == null) {
                 log.error("key is null")
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")
                 return
             }
 
             // check token is valid
             if (JwtUtils.isExpired(token, key)) {
                 log.error("key is expired")
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "key is expired")
                 filterChain.doFilter(request, response)
             }
 
@@ -62,6 +65,7 @@ class JwtFilter(
             SecurityContextHolder.getContext().authentication = auth
         } catch (e: RuntimeException) {
             log.error("Error occurs while validation ${e.toString()}")
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "key is expired")
             return
         }
         filterChain.doFilter(request, response)

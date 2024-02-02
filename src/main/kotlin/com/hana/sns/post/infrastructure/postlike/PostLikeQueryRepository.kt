@@ -18,7 +18,7 @@ class PostLikeQueryRepository(
     fun countByPost(post: Post): Long {
         return queryFactory.select(postLikeEntity.count())
             .from(postLikeEntity)
-            .where(postLikeEntity.post.eq(PostEntity(post))).fetchOne() ?: throw SnsApplicationException(ErrorCode.INTERNAL_SERVER_ERROR,"Not found postLikeEntity")
+            .where(postLikeEntity.post.eq(post.toEntity())).fetchOne() ?: throw SnsApplicationException(ErrorCode.INTERNAL_SERVER_ERROR,"Not found postLikeEntity")
     }
 
 }

@@ -1,6 +1,7 @@
 package com.hana.sns.post.infrastructure
 
 import com.hana.sns.post.domain.Post
+import com.hana.sns.user.domain.User
 import com.hana.sns.user.infrastructure.UserEntity
 import jakarta.persistence.*
 import org.hibernate.annotations.SQLDelete
@@ -36,11 +37,6 @@ class PostEntity(
     val id: Long? = null,
 ) {
 
-    constructor(post: Post) : this(
-        post.title,
-        post.body,
-        UserEntity(post.user),
-    )
     @PrePersist
     fun registeredAt() {
         this.registeredAt = LocalDateTime.now();

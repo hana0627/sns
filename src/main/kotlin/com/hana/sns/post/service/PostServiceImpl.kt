@@ -25,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class PostServiceImpl(
     private val postRepository: PostRepository,
-    private val userRepository: UserRepository,
     private val postLikeRepository: PostLikeRepository,
     private val commentRepository: CommentRepository,
     private val alarmRepository: AlarmRepository,

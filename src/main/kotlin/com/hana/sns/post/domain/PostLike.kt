@@ -1,7 +1,9 @@
 package com.hana.sns.post.domain
 
+import com.hana.sns.post.infrastructure.PostEntity
 import com.hana.sns.post.infrastructure.postlike.PostLikeEntity
 import com.hana.sns.user.domain.User
+import com.hana.sns.user.infrastructure.UserEntity
 
 data class PostLike (
     val user: User,
@@ -14,10 +16,14 @@ data class PostLike (
         Post(postLikeEntity.post),
         postLikeEntity.id
     )
-//    constructor(postEntity: PostEntity, userEntity: UserEntity): this(
-//        User(userEntity),
-//        Post(postEntity),
-//    )
+
+    fun toEntity(): PostLikeEntity {
+        return PostLikeEntity(
+            user = user.toEntity(),
+            post = post.toEntity(),
+            id = id
+        )
+    }
 
 
 }

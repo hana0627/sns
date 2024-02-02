@@ -46,18 +46,6 @@ class AlarmEntity (
 
     ){
 
-
-    constructor(alarm: Alarm) : this(
-        UserEntity(alarm.user),
-        alarm.alarmType,
-        alarm.args,
-        alarm.registeredAt,
-        alarm.updatedAt,
-        alarm.deletedAt,
-        alarm.id,
-    )
-
-
     @PrePersist
     fun registeredAt() {
         this.registeredAt = LocalDateTime.now();

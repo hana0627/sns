@@ -24,6 +24,6 @@ class AlarmRepositoryImpl(
     }
 
     override fun save(alarm: Alarm): Alarm {
-        return Alarm(alarmJpaRepository.save(AlarmEntity(alarm)))
+        return Alarm(alarmJpaRepository.save(alarm.toEntity()))
     }
 }

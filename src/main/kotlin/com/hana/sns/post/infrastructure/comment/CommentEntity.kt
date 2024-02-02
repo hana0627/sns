@@ -32,13 +32,6 @@ class CommentEntity (
     val id: Long? = null,
     ){
 
-
-    constructor(comment: Comment) : this(
-        UserEntity(comment.user),
-        PostEntity(comment.post),
-        comment.comment
-    )
-
     @PrePersist
     fun registeredAt() {
         this.registeredAt = LocalDateTime.now();

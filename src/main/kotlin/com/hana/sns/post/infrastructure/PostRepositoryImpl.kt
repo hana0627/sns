@@ -15,7 +15,7 @@ class PostRepositoryImpl (
     private val postJpaRepository: PostJpaRepository,
 ) : PostRepository {
     override fun save(post: Post): Post {
-        return Post(postJpaRepository.save(PostEntity(post)))
+        return Post(postJpaRepository.save(post.toEntity()))
     }
 
     override fun findById(postId: Long): Post? {
@@ -28,7 +28,7 @@ class PostRepositoryImpl (
     }
 
     override fun delete(post: Post) {
-        return postJpaRepository.delete(PostEntity(post))
+        return postJpaRepository.delete(post.toEntity())
     }
 
     override fun findAll(pageable: Pageable): Page<Post> {
@@ -36,6 +36,6 @@ class PostRepositoryImpl (
     }
 
     override fun findAllByUser(pageable: Pageable, user: User): Page<Post> {
-        return postJpaRepository.findAllByUser(pageable, UserEntity(user)).map { Post(it) }
+        return postJpaRepository.findAllByUser(pageable, user.toEntity()).map { Post(it) }
     }
 }

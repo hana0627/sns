@@ -20,6 +20,6 @@ class UserRepositoryImpl(
     }
 
     override fun save(user: User): User {
-       return User(userJpaRepository.save(UserEntity(user)))
+       return User(userJpaRepository.save(user.toEntity()))
     }
 }

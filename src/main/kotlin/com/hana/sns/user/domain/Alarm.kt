@@ -28,14 +28,14 @@ data class Alarm(
 
     companion object {
         fun fixture(
-            user: User = User("userName","password"),
+            user: User = User("userName", "password"),
             alarmType: AlarmType = AlarmType.NEW_COMMENT_ON_POST,
             args: AlarmArgs = AlarmArgs(1L, 2L, 1L),
             registeredAt: LocalDateTime? = null,
             updatedAt: LocalDateTime? = null,
             deletedAt: LocalDateTime? = null,
             id: Long? = null,
-        ) : Alarm {
+        ): Alarm {
             return Alarm(
                 user,
                 alarmType,
@@ -48,5 +48,17 @@ data class Alarm(
 
         }
 
+    }
+
+    fun toEntity(): AlarmEntity {
+        return AlarmEntity(
+            user = user.toEntity(),
+            alarmType = alarmType,
+            alarmArgs = args,
+            registeredAt = registeredAt,
+            updatedAt = updatedAt,
+            deletedAt = deletedAt,
+            id = id
+        )
     }
 }

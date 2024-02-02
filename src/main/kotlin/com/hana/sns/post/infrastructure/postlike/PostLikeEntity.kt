@@ -36,10 +36,10 @@ class PostLikeEntity (
         this.updatedAt = LocalDateTime.now();
     }
 
-    constructor(postLike: PostLike): this(
-        UserEntity(postLike.user),
-        PostEntity(postLike.post),
-    )
+//    constructor(postLike: PostLike): this(
+//        UserEntity(postLike.user),
+//        PostEntity(postLike.post),
+//    )
 
 
 }

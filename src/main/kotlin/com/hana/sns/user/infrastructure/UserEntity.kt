@@ -36,12 +36,6 @@ class UserEntity (
     val id: Long? = null,
 ){
 
-    constructor(user: User): this(
-        user.userName,
-        user.password,
-        user.userRole
-    )
-
     @PrePersist
     fun registeredAt() {
         this.registeredAt = LocalDateTime.now();

@@ -15,14 +15,14 @@ class CommentRepositoryImpl(
     private val commentJpaRepository: CommentJpaRepository,
 ) : CommentRepository{
     override fun save(comment: Comment): Comment {
-        return Comment(commentJpaRepository.save(CommentEntity(comment)))
+        return Comment(commentJpaRepository.save(comment.toEntity()))
     }
 
     override fun findAllByPost(post: Post, pageable: Pageable): Page<Comment> {
-        return commentJpaRepository.findAllByPost(pageable, PostEntity(post)).map { Comment(it) }
+        return commentJpaRepository.findAllByPost(pageable, post.toEntity()).map { Comment(it) }
     }
 
     override fun deleteAllByPost(post: Post) {
-        return commentJpaRepository.deleteAllByPost(PostEntity(post))
+        return commentJpaRepository.deleteAllByPost(post.toEntity())
     }
 }

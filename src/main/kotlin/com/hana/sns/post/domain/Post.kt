@@ -36,9 +36,22 @@ data class Post(
                 user = user,
             )
         }
+
     }
 
-    fun update(title:String, body: String) {
+    fun toEntity(): PostEntity {
+        return PostEntity(
+            title = title,
+            body = body,
+            user = user.toEntity(),
+            registeredAt = registeredAt,
+            updatedAt = updatedAt,
+            deletedAt = deletedAt,
+            id = id
+        )
+    }
+
+    fun update(title: String, body: String) {
         this.title = title
         this.body = body
     }

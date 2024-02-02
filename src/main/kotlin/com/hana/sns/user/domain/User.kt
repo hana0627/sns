@@ -52,7 +52,9 @@ data class User (
             )
         }
     }
-
+    fun toEntity(): UserEntity {
+        return UserEntity(userName, _password, userRole, registeredAt, updatedAt, deletedAt, id)
+    }
 
     // 스프링 시큐리티 관련 //
     override fun getAuthorities(): MutableCollection<out GrantedAuthority> {

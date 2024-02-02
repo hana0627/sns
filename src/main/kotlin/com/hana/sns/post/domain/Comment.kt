@@ -14,6 +14,17 @@ data class Comment (
     var deletedAt: LocalDateTime? = null,
     var id: Long? = null,
 ) {
+    fun toEntity(): CommentEntity {
+        return CommentEntity(
+            user = user.toEntity(),
+            post = post.toEntity(),
+            comment = comment,
+            registeredAt = registeredAt,
+            updatedAt = updatedAt,
+            deletedAt = deletedAt,
+            id = id ?: null
+        )
+    }
 
 
     constructor(user: User, post: Post, createRequest: CommentCreateRequest) : this(
@@ -25,7 +36,11 @@ data class Comment (
     constructor(commentEntity: CommentEntity) : this(
         User(commentEntity.user),
         Post(commentEntity.post),
-        commentEntity.comment
+        commentEntity.comment,
+        commentEntity.registeredAt,
+        commentEntity.updatedAt,
+        commentEntity.deletedAt,
+        commentEntity.id
     )
 
 

@@ -16,9 +16,7 @@ class PostLikeRepositoryImpl (
     private val postLikeQueryRepository: PostLikeQueryRepository
 ) : PostLikeRepository {
     override fun findByUserAndPost(user: User, post: Post): PostLike? {
-        println("오이")
         val postLikeEntity: PostLikeEntity? = postLikeJpaRepository.findByUserAndPost(user.toEntity(), post.toEntity())
-        println(postLikeEntity)
         return if(postLikeEntity != null) {
             PostLike(postLikeEntity)
         } else {
@@ -32,11 +30,11 @@ class PostLikeRepositoryImpl (
     }
 
     override fun countByPost(post: Post): Long {
-        return postLikeQueryRepository.countByPost(post)
+        return postLikeQueryRepository.countByPost(post.toEntity())
     }
 
     override fun deleteAllByPost(post: Post) {
-        return postLikeJpaRepository.deleteAllByPost(post.toEntity())
+        postLikeQueryRepository.deleteAllByPost(post.toEntity())
     }
 
 }

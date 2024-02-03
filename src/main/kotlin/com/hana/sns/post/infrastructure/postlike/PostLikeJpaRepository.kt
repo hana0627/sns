@@ -9,5 +9,4 @@ interface PostLikeJpaRepository : JpaRepository<PostLikeEntity, Int> {
 
     fun save(postLikeEntity: PostLikeEntity): PostLikeEntity
 
-    fun deleteAllByPost(post: PostEntity)
 }

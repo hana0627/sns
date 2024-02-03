@@ -13,6 +13,7 @@ import org.springframework.stereotype.Repository
 @RequiredArgsConstructor
 class CommentRepositoryImpl(
     private val commentJpaRepository: CommentJpaRepository,
+    private val commentQueryRepository: CommentQueryRepository
 ) : CommentRepository{
     override fun save(comment: Comment): Comment {
         return Comment(commentJpaRepository.save(comment.toEntity()))
@@ -23,6 +24,6 @@ class CommentRepositoryImpl(
     }
 
     override fun deleteAllByPost(post: Post) {
-        return commentJpaRepository.deleteAllByPost(post.toEntity())
+        return commentQueryRepository.deleteAllByPost(post.toEntity())
     }
 }

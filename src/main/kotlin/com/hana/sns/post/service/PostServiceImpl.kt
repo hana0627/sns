@@ -17,6 +17,7 @@ import com.hana.sns.user.domain.arg.AlarmArgs
 import com.hana.sns.user.domain.en.AlarmType
 import com.hana.sns.user.service.port.AlarmRepository
 import com.hana.sns.user.service.port.UserRepository
+import jakarta.persistence.EntityManager
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -28,6 +29,7 @@ class PostServiceImpl(
     private val postLikeRepository: PostLikeRepository,
     private val commentRepository: CommentRepository,
     private val alarmRepository: AlarmRepository,
+    private val em: EntityManager,
 ) : PostService {
     @Transactional
     override fun create(title: String, body: String, user: User): Long{
@@ -46,6 +48,7 @@ class PostServiceImpl(
         return postRepository.save(post)
     }
 
+    @Transactional
     override fun delete(postId: Long, user: User): Long {
         // 포스트존재여부
         val post: Post = getPostbyIdOrException(postId)
@@ -54,7 +57,13 @@ class PostServiceImpl(
             throw SnsApplicationException(ErrorCode.INVALID_PERMISSION,"${user.userName} has no permission with post($postId)")
         }
         postLikeRepository.deleteAllByPost(post)
+        // softDelete 방식이라 굳이 영속성객체에서
+        // 데이터 정합성 문제가 발생하지 않을것 같음
+        //em.flush()
+        //em.clear()
         commentRepository.deleteAllByPost(post)
+        //em.flush()
+        //em.clear()
         postRepository.delete(post)
 
         return postId

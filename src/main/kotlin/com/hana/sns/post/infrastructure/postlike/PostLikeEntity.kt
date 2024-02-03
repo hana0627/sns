@@ -4,10 +4,14 @@ import com.hana.sns.post.domain.PostLike
 import com.hana.sns.post.infrastructure.PostEntity
 import com.hana.sns.user.infrastructure.UserEntity
 import jakarta.persistence.*
+import org.hibernate.annotations.SQLDelete
+import org.hibernate.annotations.SQLRestriction
 import java.time.LocalDateTime
 
 @Entity
 @Table(name = "postLike")
+//@SQLDelete(sql = "UPDATE post_like SET deleted_at = NOW(6) WHERE id=?")
+//@SQLRestriction("deleted_at is NULL")
 class PostLikeEntity (
 
     @ManyToOne
@@ -20,6 +24,8 @@ class PostLikeEntity (
     var registeredAt: LocalDateTime? = null,
     @Column(name = "updated_at")
     var updatedAt: LocalDateTime? = null,
+    @Column(name = "deleted_at")
+    var deletedAt: LocalDateTime? = null,
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,

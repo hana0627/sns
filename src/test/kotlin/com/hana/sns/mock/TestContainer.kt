@@ -36,7 +36,7 @@ class TestContainer(
             val alarmRepository = FakeAlarmRepository()
 
             val userService = UserServiceImpl(userRepository, alarmRepository, passwordEncoder)
-            val postService = PostServiceImpl(postRepository, userRepository, postLikeRepository, commentRepository, alarmRepository)
+            val postService = PostServiceImpl(postRepository, postLikeRepository, commentRepository, alarmRepository)
 
             val userController = UserController(userService)
             val postController = PostController(postService)

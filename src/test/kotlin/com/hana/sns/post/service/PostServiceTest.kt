@@ -34,7 +34,7 @@ class PostServiceTest {
         postLikeRepository = FakePostLikeRepository()
         commentRepository = FakeCommentRepository()
         alramRepository = FakeAlarmRepository()
-        postService = PostServiceImpl(postRepository, userRepository, postLikeRepository, commentRepository, alramRepository)
+        postService = PostServiceImpl(postRepository, postLikeRepository, commentRepository, alramRepository)
     }
 
     @Test

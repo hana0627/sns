@@ -18,7 +18,7 @@ import java.time.LocalDateTime
 @SQLRestriction("deleted_at is NULL")
 class AlarmEntity (
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     val user: UserEntity,
 

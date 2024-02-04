@@ -1,5 +1,7 @@
 package com.hana.sns.user.domain
 
+import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.hana.sns.user.infrastructure.UserEntity
 import com.hana.sns.user.domain.en.UserRole
 import lombok.NoArgsConstructor
@@ -8,17 +10,21 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 import java.time.LocalDateTime
 
-@NoArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class User (
     val userName: String,
     val _password: String,
-    var userRole: UserRole? = null,
+    val userRole: UserRole? = null,
+    @JsonIgnore
     var registeredAt: LocalDateTime? = null,
+    @JsonIgnore
     var updatedAt: LocalDateTime? = null,
+    @JsonIgnore
     var deletedAt: LocalDateTime? = null,
     var id: Long? = null,
     ) : UserDetails{
 
+    constructor(): this("","") // Json 역직렬화시 사용
     constructor(entity: UserEntity): this(
             entity.userName,
             entity.password,
@@ -57,30 +63,35 @@ data class User (
     }
 
     // 스프링 시큐리티 관련 //
+    @JsonIgnore
     override fun getAuthorities(): MutableCollection<out GrantedAuthority> {
         return mutableListOf(SimpleGrantedAuthority(this.userRole.toString()))
     }
 
+    @JsonIgnore
     override fun getPassword(): String {
         return this._password
     }
-
+    @JsonIgnore
     override fun getUsername(): String {
         return this.userName
     }
 
+    @JsonIgnore
     override fun isAccountNonExpired(): Boolean {
         return true
     }
 
+    @JsonIgnore
     override fun isAccountNonLocked(): Boolean {
         return true
     }
-
+    @JsonIgnore
     override fun isCredentialsNonExpired(): Boolean {
         return true
     }
 
+    @JsonIgnore
     override fun isEnabled(): Boolean {
         return true
     }

@@ -29,7 +29,6 @@ class PostServiceImpl(
     private val postLikeRepository: PostLikeRepository,
     private val commentRepository: CommentRepository,
     private val alarmRepository: AlarmRepository,
-    private val em: EntityManager,
 ) : PostService {
     @Transactional
     override fun create(title: String, body: String, user: User): Long{

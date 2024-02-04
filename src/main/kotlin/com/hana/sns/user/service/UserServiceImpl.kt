@@ -6,6 +6,7 @@ import com.hana.sns.common.utils.JwtUtils
 import com.hana.sns.user.controller.port.UserService
 import com.hana.sns.user.controller.response.AlarmResponse
 import com.hana.sns.user.domain.User
+import com.hana.sns.user.infrastructure.UserCacheRepository
 import com.hana.sns.user.service.port.AlarmRepository
 import com.hana.sns.user.service.port.UserRepository
 import lombok.NoArgsConstructor
@@ -24,6 +25,7 @@ class UserServiceImpl (
     private val userRepository: UserRepository,
     private val alarmRepository: AlarmRepository,
     private val passwordEncoder: BCryptPasswordEncoder,
+    private val userCacheRepository: UserCacheRepository,
 ) : UserService{
 
     @Value("\${jwt.secret-key}")
@@ -44,20 +46,21 @@ class UserServiceImpl (
     }
     override fun login(userName: String, password: String): String {
         // 회원가입 여부 체크
-        val user: User = getUserByUserNameOrException(userName)
+        val user: User =  userCacheRepository.getUser(userName)
+            ?:getUserByUserNameOrException(userName)
+        userCacheRepository.setUser(user); // 유저정보가 있다면 캐싱
 
         // 비밀번호 체크
         if(!passwordEncoder.matches(password, user.password)) {
             throw SnsApplicationException(ErrorCode.INVALID_PASSWORD)
         }
         // 토큰 생성
-        val result = JwtUtils.generateToken(userName, secretKey, expiredMs)
-
-        return result
+        return JwtUtils.generateToken(userName, secretKey, expiredMs)
     }
 
     override fun loadUserByUserName(userName: String): User {
-        return getUserByUserNameOrException(userName)
+        return userCacheRepository.getUser(userName)
+            ?:getUserByUserNameOrException(userName)
     }
 
 

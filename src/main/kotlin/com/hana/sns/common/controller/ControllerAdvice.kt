@@ -27,12 +27,12 @@ class ControllerAdvice(
             .body(Response.error(e.errorCode.name))
     }
 
-    @ExceptionHandler(RuntimeException::class)
-    fun applicationHandler(e: RuntimeException) : ResponseEntity<Any> {
-        log.debug("Error occurs ${e.toString()}")
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-            .body(Response.error(ErrorCode.INTERNAL_SERVER_ERROR.name))
-    }
+//    @ExceptionHandler(RuntimeException::class)
+//    fun applicationHandler(e: RuntimeException) : ResponseEntity<Any> {
+//        log.debug("Error occurs ${e.toString()}")
+//        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//            .body(Response.error(ErrorCode.INTERNAL_SERVER_ERROR.name))
+//    }
 
 
 }

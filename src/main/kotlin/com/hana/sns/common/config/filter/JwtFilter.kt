@@ -31,7 +31,6 @@ class JwtFilter(
         if(header == null || !header.startsWith("Bearer ")) {
             log.error("Error occurs while getting headers")
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")
-//            filterChain.doFilter(request,response)
             return
         }
 

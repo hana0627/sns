@@ -6,8 +6,8 @@ import com.hana.sns.common.utils.JwtUtils
 import com.hana.sns.user.controller.port.UserService
 import com.hana.sns.user.controller.response.AlarmResponse
 import com.hana.sns.user.domain.User
-import com.hana.sns.user.infrastructure.UserCacheRepository
 import com.hana.sns.user.service.port.AlarmRepository
+import com.hana.sns.user.service.port.UserCacheRepository
 import com.hana.sns.user.service.port.UserRepository
 import lombok.NoArgsConstructor
 import lombok.RequiredArgsConstructor

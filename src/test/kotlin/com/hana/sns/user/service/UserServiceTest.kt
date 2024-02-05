@@ -2,10 +2,7 @@ package com.hana.sns.user.service
 
 import com.hana.sns.common.exception.SnsApplicationException
 import com.hana.sns.common.exception.en.ErrorCode
-import com.hana.sns.mock.FakeAlarmRepository
-import com.hana.sns.mock.FakePasswordEncoder
-import com.hana.sns.mock.FakePostRepository
-import com.hana.sns.mock.FakeUserRepository
+import com.hana.sns.mock.*
 import com.hana.sns.post.domain.Post
 import com.hana.sns.user.controller.port.UserService
 import com.hana.sns.user.domain.Alarm
@@ -25,6 +22,7 @@ class UserServiceTest() {
     private lateinit var userRepository: FakeUserRepository
     private lateinit var alarmRepository: FakeAlarmRepository
     private lateinit var passwordEncoder: FakePasswordEncoder
+    private lateinit var userCacheRepository: FakeUserCacheRepository
     private lateinit var userService: UserService
 
 
@@ -33,7 +31,8 @@ class UserServiceTest() {
         userRepository = FakeUserRepository()
         alarmRepository = FakeAlarmRepository()
         passwordEncoder = FakePasswordEncoder()
-        userService = UserServiceImpl(userRepository,alarmRepository, passwordEncoder)
+        userCacheRepository = FakeUserCacheRepository()
+        userService = UserServiceImpl(userRepository,alarmRepository, passwordEncoder, userCacheRepository)
     }
 
     @Test
